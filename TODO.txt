@@ -1,0 +1,2 @@
+1. pranka_panda의 joint state를 시뮬레이션으로 받아와서 arm_motion_planner에 넣어주기
+2. 샘플러들에 Obstacle정보 넣어주기(Base sampler lazy collision check 넣기)

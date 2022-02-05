@@ -9,6 +9,8 @@ import smach
 import numpy
 from smach import StateMachine, Concurrence
 import smach_ros
+import tf2_ros
+
 from smach_ros import ServiceState, SimpleActionState, IntrospectionServer
 import task_assembly.srv
 from task_assembly.srv import plan_mobile_motion, plan_mobile_motionRequest, plan_arm_motionResponse
@@ -16,11 +18,13 @@ from task_assembly.srv import plan_arm_motion, plan_arm_motionRequest, plan_mobi
 from task_assembly.srv import base_placement, base_placementRequest, base_placementResponse
 from task_assembly.srv import sim_request, sim_requestRequest, sim_requestResponse
 
+from std_msgs.msg import Bool
 from task_assembly.msg import GraspConfigList
 from task_assembly.msg import GraspConfig
 from task_assembly.msg import Obstacle2D
 from task_assembly.msg import MobileTrajectory
-from geometry_msgs.msg import Pose2D
+from geometry_msgs.msg import Pose2D, Pose, TransformStamped
+from trajectory_msgs.msg import JointTrajectory
 from math import pi
 from enum import Enum
 
@@ -48,7 +52,7 @@ class getRandomWork(smach.State) :
     def __init__(self):
         smach.State.__init__(self, 
                                 outcomes=['succeeded','failed'],
-                                input_keys=['GraspConfig'])
+                                output_keys=['targetGrasp'])
 
         # 우선하나의 Grasp만 정의를 해볼께요
         self.doorHandle = GraspConfigList()
@@ -76,8 +80,12 @@ class getRandomWork(smach.State) :
         self.doorHandle.grasps.append(tmpGrasp)
 
     def execute(self, userdata) :
-        print(len(userdata.simRunState.points))
-        return "succeeded"
+        userdata.targetGrasp = self.doorHandle
+        # userdata.targetGrasp_out = userdata.targetGrasp_in 
+        if len(self.doorHandle.grasps) <= 0:
+            return "failed"
+        else :
+            return "succeeded"
 
 # 시뮬레이션 실행을 정의
 class SimInterface(smach.State):
@@ -89,26 +97,24 @@ class SimInterface(smach.State):
         print(len(userdata.simRunState.points))
         return "succeeded"
 
-    # def Search_and_Sampler(userdata,response): 
-    #     # print(len(response.mobile_trajectory.points))
-    #     userdata.mobile_plan_res.points = response.mobile_trajectory.points
-    #     if len(userdata.mobile_plan_res.points) : 
-    #         return "succeeded"
-    #     else :
-    #         return "aborted"
+def base_pose_sampler(userdata,response): 
+    if response.IsSucceeded.data :
+        userdata.robotBasePose = response.target_mobile_pose
+        userdata.sampleState.data = response.IsSucceeded.data
+        userdata.targetEEpose = response.target_ee_pose
+        return 'succeeded'
+    else :
+        return 'failed'
 
 def mobile_fexibility_check(userdata,response): 
     # print(len(response.mobile_trajectory.points))
-    userdata.mobile_plan_res.points = response.mobile_trajectory.points
-    if len(userdata.mobile_plan_res.points) : 
-        return "succeeded"
-    else :
-        return "replanning"
+    userdata.mobile_plan_traj = response.mobile_trajectory
+    return "succeeded"
 
 def arm_fexibility_check(userdata,response): 
     # print(len(response.mobile_trajectory.points))
-    userdata.mobile_plan_res.points = response.mobile_trajectory.points
-    if len(userdata.mobile_plan_res.points) : 
+    userdata.mobile_plan_traj.points = response.mobile_trajectory.points
+    if len(userdata.mobile_plan_traj.points) : 
         return "succeeded"
     else :
         return "replanning"
@@ -118,59 +124,123 @@ def main():
     rospy.init_node('TAMP_Scence')
 
     # Create the top level SMACH state machine
-    sm = StateMachine(outcomes=['succeeded','aborted','preempted','failed'])
+    sm = StateMachine(outcomes=['succeeded','aborted','preempted'])
     
     ########################################### Define User-Data ######################################################################
     sm.userdata.simRunState = SimRunState.RUN_SIMULATION.value
     sm.userdata.armTraj = plan_arm_motionResponse()
-    sm.userdata.mobileTraj = MobileTrajectory()
-    sm.userdata.graspConfig = GraspConfig()
-
-    mmreq = plan_mobile_motionRequest()
-    mmreq.current_mobile_state.x = 0
-    mmreq.current_mobile_state.y = 0
-    mmreq.current_mobile_state.theta = 0
-
-    mmreq.target_mobile_pose.x = 4.9
-    mmreq.target_mobile_pose.y = -2.3
-    mmreq.target_mobile_pose.theta = -pi/2.0
-
-    obs1 = Obstacle2D()
-    obs1.x.data = 2.7251
-    obs1.y.data = -0.5276
-    obs1.radius.data = 0.6
-
-    mmreq.Obstacles2D.append(obs1)
+    sm.userdata.mobileTraj = plan_mobile_motionResponse()
+    sm.userdata.armTraj = JointTrajectory()
+    sm.userdata.graspConfig = GraspConfigList()
+    sm.userdata.robotBase = Pose2D()
+    sm.userdata.TCPpose = Pose()
+    sm.userdata.IsSucceeded = Bool()
+    ###################################################################################################################################
+    # mmreq.Obstacles2D.append(obs1)
 
     coverdata = Pose2D()
     coverdata.x = 0
     coverdata.y = 0
     coverdata.theta = 0
 
+                # transitions={'failed':'SearchContinousWorkSpace',
+                #              'succeeded':'basePoseSampler'}
     # Open the container
     with sm: 
+        StateMachine.add('SearchContinousWorkSpace',getRandomWork(),
+                transitions={'succeeded':'basePoseSampler',
+                             'failed':'SearchContinousWorkSpace'},
+                remapping={'targetGrasp':'graspConfig'})
+
+        @smach.cb_interface(input_keys=['targetGraspConfig'])
+        def base_pose_sampler_request_cb(userdata, request):
+            srv_request = base_placementRequest()
+            srv_request.minEntry.data = 10
+            srv_request.eGridySearch.data = False
+            srv_request.targetGrasp = userdata.targetGraspConfig
+            return srv_request
+
+        @smach.cb_interface(input_keys=['mobileTarget'])
+        def mobile_motion_plan_request_cb(userdata, request):
+            mobile_srv_request = plan_mobile_motionRequest()
+
+            tfBuffer = tf2_ros.Buffer()
+            listener = tf2_ros.TransformListener(tfBuffer)
+            rate = rospy.Rate(10.0)
+            trans = TransformStamped()
+            while not trans.header.frame_id == "map":
+                try:
+                    trans = tfBuffer.lookup_transform("map", "mobile_base", rospy.Time())
+                except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+                    rate.sleep()
+                    continue
+
+            mobile_srv_request.current_mobile_state.x = trans.transform.translation.x
+            mobile_srv_request.current_mobile_state.y = trans.transform.translation.y
+            mobile_srv_request.current_mobile_state.theta = 0  #추후 변경예정
+
+            mobile_srv_request.target_mobile_pose.x = userdata.mobileTarget.x
+            mobile_srv_request.target_mobile_pose.y = userdata.mobileTarget.y
+            mobile_srv_request.target_mobile_pose.theta = userdata.mobileTarget.theta
+
+            # Obstacle in Given Scence
+            obs1 = Obstacle2D()
+            obs1.x.data = 2.7251
+            obs1.y.data = -0.5276
+            obs1.radius.data = 0.6
+
+            mobile_srv_request.Obstacles2D.append(obs1)
+
+            return mobile_srv_request
+
+        @smach.cb_interface(input_keys=['mobile_goal','targetEEpose'])
+        def arm_motion_plan_request_cb(userdata, request):
+            srv_request = plan_arm_motionRequest()
+            srv_request.target_ee_pose = userdata.targetEEpose
+            srv_request.current_mobile_state = userdata.mobile_goal.points[-1]
+
+            return srv_request
+
+        StateMachine.add('basePoseSampler',
+                ServiceState('/plan_base_sampling', task_assembly.srv.base_placement,
+                    request_cb = base_pose_sampler_request_cb,
+                    response_cb = base_pose_sampler,
+                    input_keys = ['targetGraspConfig','sampleState'],
+                    output_keys = ['robotBasePose','targetEEpose'],
+                    outcomes=['succeeded','failed']),
+                    transitions={'succeeded':'MobileMotionPlanning',
+                                 'failed':'SearchContinousWorkSpace'},
+                    remapping={'targetGraspConfig':'graspConfig', 
+                               'robotBasePose':'robotBase',
+                               'sampleState':'IsSucceeded',
+                               'targetEEpose':'TCPpose'})
+
         StateMachine.add('MobileMotionPlanning',
                 ServiceState('/plan_mobile_motion', task_assembly.srv.plan_mobile_motion,
-                    request = task_assembly.srv.plan_mobile_motionRequest(mmreq.current_mobile_state,mmreq.target_mobile_pose,mmreq.Obstacles2D),
+                    request_cb = mobile_motion_plan_request_cb,
                     response_cb = mobile_fexibility_check,
-                    input_keys = ['mobile_plan_res'],
-                    output_keys = ['mobile_plan_traj']),
-                    transitions={'succeeded':'ControllHuskyInterface'},
-                    remapping={'mobile_plan_res':'mobileTraj', 
-                               'mobile_plan_traj':'mobileTraj',
-                               'replanning':'aborted'})
+                    input_keys = ['mobileTarget'],
+                    output_keys = ['mobile_plan_traj'],
+                    outcomes=['succeeded','replanning']),
+                    transitions={'succeeded':'ControllHuskyInterface',
+                                 'replanning':'basePoseSampler'},
+                    remapping={'mobileTarget':'robotBase', 
+                               'mobile_plan_traj':'mobileTraj'})
+
+        # StateMachine.add('ArmMotionPlanning',
+        #         ServiceState('/plan_arm_motion', task_assembly.srv.plan_arm_motion,
+        #             request_cb = arm_motion_plan_request_cb,
+        #             response_cb = arm_fexibility_check,
+        #             input_keys = ['mobile_goal','targetEEpose'],
+        #             output_keys = ['arm_trajectory_res'],
+        #             outcomes=['succeeded','replanning']),
+        #             transitions={'succeeded':'ControllHuskyInterface',
+        #                          'replanning':'basePoseSampler'},
+        #             remapping={'mobile_goal':'mobileTraj', 
+        #                        'targetEEpose':'TCPpose'})
 
         StateMachine.add('ControllHuskyInterface',SimInterface(),
                         remapping={'simRunState':'mobileTraj'})
-        # StateMachine.add('ArmMotionPlanning',
-        #         ServiceState('/plan_arm_motion', task_assembly.srv.plan_mobile_motion,
-        #             request = task_assembly.srv.plan_mobile_motionRequest(mmreq.current_mobile_state,mmreq.target_mobile_pose,mmreq.Obstacles2D),
-        #             response_cb = arm_fexibility_check,
-        #             input_keys = ['mobile_plan_res'],
-        #             output_keys = ['mobile_plan_traj']),
-        #             remapping={'mobile_plan_res':'mobileTraj', 
-        #                        'mobile_plan_traj':'mobileTraj'
-        #                        'replanning' : 'aborted'})
 
     # Attach a SMACH introspection server
     sis = IntrospectionServer('RL_SIM', sm, '/TAMP_start')

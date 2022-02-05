@@ -140,6 +140,7 @@ namespace RobotWorkSpace
         {
             return (x * gridSizeY * gridSizeRotation + y * gridSizeRotation + r);
         };
+        
         float minX, maxX; // in global coord system
         float minY, maxY; // in global coord system
         float minR, maxR;     // in global coord system

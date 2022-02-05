@@ -84,12 +84,23 @@ private:
             if(ok)
             {
                 std::cout << x <<" , " << y <<" , "<< r << " , "<<entries <<std::endl;
+                MathTools::Quaternion quat = MathTools::eigen4f2quat(gp);
+                res.target_ee_pose.position.x = gp(0,3);
+                res.target_ee_pose.position.y = gp(1,3);
+                res.target_ee_pose.position.z = gp(2,3);
+                res.target_ee_pose.orientation.w = quat.w;
+                res.target_ee_pose.orientation.x = quat.x;
+                res.target_ee_pose.orientation.y = quat.y;
+                res.target_ee_pose.orientation.z = quat.z;
+
                 res.target_mobile_pose.x = x;
                 res.target_mobile_pose.y = y;
                 res.target_mobile_pose.theta = r;
+                res.IsSucceeded.data = true;
             }
             else
             {
+                res.IsSucceeded.data = false;
                 ROS_ERROR("Sampling has Failed!!!");
                 return false;
             }

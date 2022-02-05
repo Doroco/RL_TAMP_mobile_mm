@@ -5,7 +5,5 @@ task_assembly/Obstacle3D[] Obstacles3D
 task_assembly/PoseConstraint Pose_bound
 std_msgs/Bool interpolate_path
 std_msgs/Bool plan_only
-
 ---
-
 trajectory_msgs/JointTrajectory joint_trajectory
