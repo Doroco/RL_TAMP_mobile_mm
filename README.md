@@ -4,6 +4,9 @@
 #### Please wait for month...!
 Reinfore Learning / Mobile manipulator Task Planning implementaion  by using DDPG
 
+## Experiment 
+'ros-noetic', 'ubuntu 20.04'
+
 - Simulation Scence (Coppeliasim)
 ![SimEnv](https://user-images.githubusercontent.com/49723556/151513552-4a18bd52-326e-4349-b107-844899f97b59.png)
 
