@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>task_assembly</name>
+  <version>0.0.0</version>
+  <description>The visual_perception_msgs package</description>
+
+  <maintainer email="fergonzaramos@yahoo.es">Fernando González</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>trajectory_msgs</depend>
+
+  <exec_depend>message_runtime</exec_depend>
+
+  <export>
+  </export>
+</package>

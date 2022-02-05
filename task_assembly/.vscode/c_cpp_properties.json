@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/min/test_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/min/test_ws/src/arm_motion_planner/include/**",
+        "/home/min/test_ws/src/base_placement_planner/include/**",
+        "/home/min/test_ws/src/gpd_ros/include/**",
+        "/home/min/test_ws/src/mobile_motion_planner/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

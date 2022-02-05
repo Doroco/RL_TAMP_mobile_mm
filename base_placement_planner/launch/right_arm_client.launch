@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node name="RightArmPlannerClient" pkg="arm_motion_planner" type="RightArmPlannerClient" output="screen" >
+  </node>
+
+</launch>

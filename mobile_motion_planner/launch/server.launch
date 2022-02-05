@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+  <param name="robot_description" textfile="$(find franka_description)/husky_description/urdf/husky_modified.urdf"/>
+  <param name="urdf_param" value="\robot_description"/> 
+
+
+  <node name="MobilePlannerServer" pkg="mobile_motion_planner" type="MobilePlannerServer" output="screen" >
+    <param name="yaml_path" type="string" value="$(find mobile_motion_planner)/config/robot_param.yaml"/> 
+  </node>
+
+</launch>

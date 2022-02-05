@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node name="MobilePlannerClient" pkg="mobile_motion_planner" type="MobilePlannerClient" output="screen" >
+  </node>
+
+</launch>

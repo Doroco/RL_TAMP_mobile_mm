@@ -1,0 +1,4 @@
+sensor_msgs/JointState current_arm_joint_state
+std_msgs/Bool interpolate_path
+---
+trajectory_msgs/JointTrajectory joint_trajectory

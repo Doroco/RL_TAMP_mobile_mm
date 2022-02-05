@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node name="interfaceClient" pkg="base_placement_planner" type="interfaceClient" output="screen" >
+  </node>
+
+</launch>

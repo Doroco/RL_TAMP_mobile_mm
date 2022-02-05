@@ -1,0 +1,59 @@
+digraph G {
+node [shape=box];
+"base_frame" [label="base_frame"];
+"panda_link0" [label="panda_link0"];
+"panda_link1" [label="panda_link1"];
+"panda_link2" [label="panda_link2"];
+"panda_link3" [label="panda_link3"];
+"panda_link4" [label="panda_link4"];
+"panda_link5" [label="panda_link5"];
+"panda_link6" [label="panda_link6"];
+"panda_link7" [label="panda_link7"];
+"panda_link8" [label="panda_link8"];
+"frear_left_wheel_link" [label="frear_left_wheel_link"];
+"frear_right_wheel_link" [label="frear_right_wheel_link"];
+"front_left_wheel_link" [label="front_left_wheel_link"];
+"front_right_wheel_link" [label="front_right_wheel_link"];
+"top_chassis_link" [label="top_chassis_link"];
+"top_plate_link" [label="top_plate_link"];
+"top_plate_front_link" [label="top_plate_front_link"];
+"top_plate_rear_link" [label="top_plate_rear_link"];
+"user_rail_link" [label="user_rail_link"];
+node [shape=ellipse, color=blue, fontcolor=blue];
+"base_frame" -> "base_frame_joint" [label="xyz: 0.35 0 0.1197 \nrpy: 0 -0 0"]
+"base_frame_joint" -> "panda_link0"
+"panda_link0" -> "panda_joint1" [label="xyz: 0 0 0.333 \nrpy: 0 -0 0"]
+"panda_joint1" -> "panda_link1"
+"panda_link1" -> "panda_joint2" [label="xyz: 0 0 0 \nrpy: -1.5708 0 0"]
+"panda_joint2" -> "panda_link2"
+"panda_link2" -> "panda_joint3" [label="xyz: 0 -0.316 0 \nrpy: 1.5708 -0 0"]
+"panda_joint3" -> "panda_link3"
+"panda_link3" -> "panda_joint4" [label="xyz: 0.0825 0 0 \nrpy: 1.5708 -0 0"]
+"panda_joint4" -> "panda_link4"
+"panda_link4" -> "panda_joint5" [label="xyz: -0.0825 0.384 0 \nrpy: -1.5708 0 0"]
+"panda_joint5" -> "panda_link5"
+"panda_link5" -> "panda_joint6" [label="xyz: 0 0 0 \nrpy: 1.5708 -0 0"]
+"panda_joint6" -> "panda_link6"
+"panda_link6" -> "panda_joint7" [label="xyz: 0.088 0 0 \nrpy: 1.5708 -0 0"]
+"panda_joint7" -> "panda_link7"
+"panda_link7" -> "panda_joint8" [label="xyz: 0 0 0.107 \nrpy: 0 -0 0"]
+"panda_joint8" -> "panda_link8"
+"base_frame" -> "frear_left_wheel" [label="xyz: -0.256 0.2854 -0.0906 \nrpy: 0 -0 0"]
+"frear_left_wheel" -> "frear_left_wheel_link"
+"base_frame" -> "frear_right_wheel" [label="xyz: -0.256 -0.2854 -0.0906 \nrpy: 0 -0 0"]
+"frear_right_wheel" -> "frear_right_wheel_link"
+"base_frame" -> "front_left_wheel" [label="xyz: 0.256 0.2854 -0.0906 \nrpy: 0 -0 0"]
+"front_left_wheel" -> "front_left_wheel_link"
+"base_frame" -> "front_right_wheel" [label="xyz: 0.256 -0.2854 -0.0906 \nrpy: 0 -0 0"]
+"front_right_wheel" -> "front_right_wheel_link"
+"base_frame" -> "top_chassis_joint" [label="xyz: 0 0 -0.13 \nrpy: 0 -0 0"]
+"top_chassis_joint" -> "top_chassis_link"
+"base_frame" -> "top_plate_joint" [label="xyz: 0.0812 0 0.115 \nrpy: 0 -0 0"]
+"top_plate_joint" -> "top_plate_link"
+"top_plate_link" -> "top_plate_front_joint" [label="xyz: 0.01367 0 -0.2436 \nrpy: 0 -0 0"]
+"top_plate_front_joint" -> "top_plate_front_link"
+"top_plate_link" -> "top_plate_rear_joint" [label="xyz: -0.71633 0 -0.2436 \nrpy: 0 -0 0"]
+"top_plate_rear_joint" -> "top_plate_rear_link"
+"base_frame" -> "user_rail" [label="xyz: 0.272 0 0.115 \nrpy: 0 -0 0"]
+"user_rail" -> "user_rail_link"
+}

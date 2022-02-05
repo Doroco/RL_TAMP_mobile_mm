@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>TAMP_interface</name>
+  <version>0.0.0</version>
+  <description>The TAMP_interface package</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="ronkube@todo.todo">ronkube</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
+
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>smach</build_depend>
+  <build_depend>smach_ros</build_depend>
+
+  <!-- 메시지 의존성  -->
+  <depend>task_assembly</depend>
+  
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>smach</build_export_depend>
+  <build_export_depend>smach_ros</build_export_depend>
+
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>smach</exec_depend>
+  <exec_depend>smach_ros</exec_depend>
+
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>

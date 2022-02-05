@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<launch>
+
+  <param name="franka_arm_description" command="$(find xacro)/xacro.py '$(find franka_description)/robots/panda_arm.urdf.xacro'"/>
+  <param name="urdf_param" value="/franka_arm_description"/> 
+  <!-- <param name="sim_enable" value= "true"/>  use simulator? -->
+
+  <!-- if simulator on -->
+  <node pkg="tf" type="static_transform_publisher" name="mobile_base"
+  args="0.0 0.0 0.0 0 0 0 1 map mobile_base 10" />
+
+  <node pkg="tf" type="static_transform_publisher" name="panda_base"
+  args="0.30861 0.0 0.4405 0 0 0 1 mobile_base panda_base 10" />
+
+  <node pkg="tf" type="static_transform_publisher" name="camera_base"
+  args="-0.21855 -0.1159 1.5190 0 0 0 1 mobile_base camera_base 10" /> 
+
+  <node pkg="tf" type="static_transform_publisher" name="rgb_optical_frame"
+  args="0.0 0.0 0.0 0.499872893095 0.499872893095 0.500119030476 0.500120937824 camera_base rgb_optical_frame 10" /> 
+
+  <node name="ArmPlannerServer" pkg="arm_motion_planner" type="ArmPlannerServer" output="screen" >
+    <param name="yaml_path" type="string" value="$(find arm_motion_planner)/config/hw_param.yaml"/>
+  </node>
+<!-- 
+  <include file="$(find mobile_motion_planner)/launch/server.launch">
+  </include> -->
+
+</launch>

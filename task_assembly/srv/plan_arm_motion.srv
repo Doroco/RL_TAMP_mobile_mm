@@ -1,0 +1,11 @@
+sensor_msgs/JointState current_joint_state
+geometry_msgs/Pose2D current_mobile_state
+geometry_msgs/Pose target_ee_pose
+task_assembly/Obstacle3D[] Obstacles3D
+task_assembly/PoseConstraint Pose_bound
+std_msgs/Bool interpolate_path
+std_msgs/Bool plan_only
+
+---
+
+trajectory_msgs/JointTrajectory joint_trajectory

@@ -1,0 +1,8 @@
+std_msgs/Bool constrain_pose 
+
+geometry_msgs/Point32 position_bound_lower
+geometry_msgs/Point32 position_bound_upper
+
+geometry_msgs/Point32 orientation_bound_lower
+geometry_msgs/Point32 orientation_bound_upper
+

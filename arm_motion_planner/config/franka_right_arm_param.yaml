@@ -1,0 +1,17 @@
+# urdf path for rbdl model construction
+urdf_path: package://franka_description/robots/panda_arm_right_rbdl.urdf  # for RBDL
+
+# Start & end chain for inverse kinematics
+chain_start: panda_link0 # base link
+chain_end: panda_link8_r # end-effector link
+
+# Joint limit
+joint_limit_lower: [-166.0, -101.0, -166.0, -176.0, -166.0, -1.0, -166.0]
+joint_limit_upper: [166.0,  101.0,  166.0, -4.0, 166.0, 215.0, 166.0]
+
+# Link name & dimension for Collision Check
+link_data:
+  link_name: [panda_link1_r, panda_link3_r, panda_link5_r, panda_link7_r] # Link name in URDF file
+  link_dimension: [[0.06, 0.13, 0.185],  [0.09, 0.115, 0.175], [0.06, 0.09, 0.20], [0.075, 0.05, 0.125]] # Width, Depth, Height
+  link_position: [[0.0, 0.0, -0.1331],  [0.025, -0.0, -0.099], [0.005, 0.045, -0.1381], [0.0, -0.0, -0.048]] # x, y, z relative to link's center of mass
+  link_orientation: [[0.0, 0.0, 0.0],  [0.0, 0.3490, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.7853]] # Roll pitch yaw relative to center of box

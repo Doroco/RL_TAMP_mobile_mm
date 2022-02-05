@@ -1,0 +1,2 @@
+geometry_msgs/Pose Box_pose
+geometry_msgs/Point Box_dimension

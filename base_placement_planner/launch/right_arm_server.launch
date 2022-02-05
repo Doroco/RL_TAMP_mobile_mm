@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+
+<param name="robocare_right_arm_description" command="$(find xacro)/xacro.py '$(find social_robot_description_snu)/urdf/social_robot_upper_body_with_torso_snu_8dof.urdf.xacro'"/>
+    <param name="urdf_param" value="/robocare_right_arm_description"/> 
+
+  <node name="RightArmPlannerServer" pkg="arm_motion_planner" type="RightArmPlannerServer" output="screen" >
+    <param name="yaml_path" type="string" value="$(find arm_motion_planner)/config/right_arm_param_8dof.yaml"/> 
+  </node>
+
+</launch>

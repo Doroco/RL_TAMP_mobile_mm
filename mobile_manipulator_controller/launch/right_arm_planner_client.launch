@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node name="RequestRightArmPlanner" pkg="mobile_manipulator_controller" type="RequestRightArmPlanner" output="screen" >
+  </node>
+
+</launch>

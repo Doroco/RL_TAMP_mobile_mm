@@ -1,0 +1,6 @@
+# 2D space dimension : x, y, theta
+position_limit_lower: [-1.5, -3.2, -3.14159]
+position_limit_upper: [6.2, 3.7, 3.14159]
+
+mobile_length : 0.8
+mobile_width : 0.8

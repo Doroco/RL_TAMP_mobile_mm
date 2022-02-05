@@ -1,0 +1,121 @@
+function __getObjectPosition__(a,b)
+    -- compatibility routine, wrong results could be returned in some situations, in CoppeliaSim <4.0.1
+    if b==sim.handle_parent then
+        b=sim.getObjectParent(a)
+    end
+    if (b~=-1) and (sim.getObjectType(b)==sim.object_joint_type) and (sim.getInt32Param(sim.intparam_program_version)>=40001) then
+        a=a+sim.handleflag_reljointbaseframe
+    end
+    return sim.getObjectPosition(a,b)
+end
+function __getObjectQuaternion__(a,b)
+    -- compatibility routine, wrong results could be returned in some situations, in CoppeliaSim <4.0.1
+    if b==sim.handle_parent then
+        b=sim.getObjectParent(a)
+    end
+    if (b~=-1) and (sim.getObjectType(b)==sim.object_joint_type) and (sim.getInt32Param(sim.intparam_program_version)>=40001) then
+        a=a+sim.handleflag_reljointbaseframe
+    end
+    return sim.getObjectQuaternion(a,b)
+end
+
+function getTransformStamped(objHandle, name, relTo, relToName)
+  -- This function retrieves the stamped transform for a specific object
+  t = simROS.getTime()
+  p = __getObjectPosition__(objHandle, relTo)
+  o = __getObjectQuaternion__(objHandle, relTo)
+  return {
+      header = {stamp=t, frame_id=relToName},
+      child_frame_id = name,
+      transform = {
+        translation={x=p[1],y=p[2],z=p[3]},
+        rotation={x=o[1],y=o[2],z=o[3],w=o[4]}
+              }
+      }
+end
+
+function sysCall_init() 
+    kinectHandle=sim.getObjectHandle('kinect')
+    depthCam=sim.getObjectHandle('kinect_depth')
+    colorCam=sim.getObjectHandle('kinect_rgb')
+    
+    depth_pub=simROS.advertise('/depth/image_raw', 'sensor_msgs/Image')
+    simROS.publisherTreatUInt8ArrayAsString(depth_pub) -- treat uint8 arrays as strings (much faster, tables/arrays are kind of slow in Lua)
+   
+    rgb_pub=simROS.advertise('/k4a/rgb/image_rect_color', 'sensor_msgs/Image')
+    simROS.publisherTreatUInt8ArrayAsString(rgb_pub) -- treat uint8 arrays as strings (much faster, tables/arrays are kind of slow in Lua)
+
+    info_pub=simROS.advertise('/depth/camera_info', 'sensor_msgs/CameraInfo')
+    simROS.publisherTreatUInt8ArrayAsString(info_pub)
+	
+    depth_array_pub = simROS.advertise('/vrep/depth', 'std_msgs/Float32MultiArray')
+    baseLinkHandle = sim.getObjectHandle("Base_link") -- lyz added
+end
+
+function sysCall_sensing()
+    -- Publish the image of the active vision sensor:
+    local data=sim.getVisionSensorDepthBuffer(depthCam+sim.handleflag_codedstring)
+    local res,nearClippingPlane=sim.getObjectFloatParameter(depthCam,sim.visionfloatparam_near_clipping)
+    local res,farClippingPlane=sim.getObjectFloatParameter(depthCam,sim.visionfloatparam_far_clipping)
+
+    nearClippingPlane=nearClippingPlane*1000 -- we want mm
+    farClippingPlane=farClippingPlane*1000 -- we want mm
+
+    data=sim.transformBuffer(data,sim.buffer_float,farClippingPlane-nearClippingPlane,nearClippingPlane,sim.buffer_uint16)
+    local res=sim.getVisionSensorResolution(depthCam)
+    d_depth={}
+    d_depth['header']={seq=0,stamp=simROS.getTime(), frame_id="map"}
+    d_depth['height']=res[2]
+    d_depth['width']=res[1]
+    d_depth['encoding']='32UC1' 
+    d_depth['is_bigendian']=0
+    d_depth['step']=res[1]*2 --res[2]
+    d_depth['data']=data --data
+    simROS.publish(depth_pub,d_depth)
+    
+    local depth
+    tb_depth={}
+    tb_depth['data']=sim.getVisionSensorDepthBuffer(depthCam)
+    simROS.publish(depth_array_pub, tb_depth)
+    
+    local ress,view_angle=sim.getObjectFloatParameter(depthCam, sim.visionfloatparam_perspective_angle)
+    f_x = (res[1]/2)/math.tan(view_angle/2);
+    f_y = f_x;
+    ci={}
+    ci['header']={seq=0,stamp=simROS.getTime(), frame_id="map"}
+    ci['height']=res[2]
+    ci['width']=res[1]
+    ci['distortion_model']='plumb_bob'
+    
+    ci['D']={0, 0, 0, 0, 0}
+    ci['K']={f_x, 0, res[1]/2, 0, f_y, res[2]/2, 0, 0, 1}
+    ci['R']={1, 0, 0, 0, 1, 0, 0, 0, 1}
+    ci['P']={f_x, 0, res[1]/2, 0, 0, f_y, res[2]/2, 0, 0, 0, 1, 0}
+    ci['binning_x']= 0
+    ci['binning_y']= 0
+    ci['roi']= {x_offset=0, y_offset=0, width = 0, height = 0, do_rectify= false}
+    simROS.publish(info_pub,ci)
+
+    -- Publish the image of the active vision sensor:
+    -- Must open the kinect_rgb_front_down explicit handling
+    local data_rgb,w,h=sim.getVisionSensorCharImage(colorCam)
+    d_rgb={}
+    d_rgb['header']={seq=0,stamp=simROS.getTime(), frame_id="map"}
+    d_rgb['height']=h
+    d_rgb['width']=w
+    d_rgb['encoding']='rgb8'
+    d_rgb['is_bigendian']=0
+    d_rgb['step']=w*3 -- rosrun image_view image_view image:=/rgb_image 
+    d_rgb['data']=data_rgb
+    simROS.publish(rgb_pub,d_rgb)
+ 
+    simROS.sendTransform(getTransformStamped(depthCam,'map',baseLinkHandle,'base_link'))
+end
+
+function sysCall_cleanup()
+    simROS.shutdownPublisher(rgb_pub)
+    simROS.shutdownPublisher(depth_pub) 
+    simROS.shutdownPublisher(depth_array_pub)
+    simROS.shutdownPublisher(info_pub)
+end 
+

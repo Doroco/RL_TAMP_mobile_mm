@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/kendrick/catkin_ws/devel/include/**",
+                "/opt/ros/kinetic/include/**",
+                "/home/kendrick/catkin_ws/src/CBiRRT_franka_dual_arm/include/**",
+                "/home/kendrick/catkin_ws/src/assembly_with_vrep/include/**",
+                "/home/kendrick/catkin_ws/src/mobile_manipulator_motion_planner_robocare/include/**",
+                "/home/kendrick/catkin_ws/src/moveit_vrep_interface/include/**",
+                "/home/kendrick/catkin_ws/src/ros_service_tutorial/include/**",
+                "/home/kendrick/catkin_ws/src/vrep_franka_tutorial/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

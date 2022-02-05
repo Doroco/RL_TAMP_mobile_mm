@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!--param name="robot_description" textfile="$(find social_robot_description)/urdf/social_robot_right.urdf"/>
+  <param name="urdf_param" value="\robot_description"/--> 
+
+<param name="franka_arm_description" command="$(find xacro)/xacro.py '$(find franka_description)/robots/panda_dual_arm.urdf.xacro'"/>
+<param name="urdf_param" value="/franka_arm_description"/> 
+
+  <node name="FrankaArmPlannerServer" pkg="arm_motion_planner" type="FrankaArmPlannerServer" output="screen" >
+    <param name="yaml_path" type="string" value="$(find arm_motion_planner)/config/franka_left_arm_param.yaml"/> 
+  </node>
+
+</launch>

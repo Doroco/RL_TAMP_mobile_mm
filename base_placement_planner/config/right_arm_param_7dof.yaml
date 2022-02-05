@@ -1,0 +1,17 @@
+# urdf path
+urdf_path: package://social_robot_description_snu/urdf/social_robot_right_7dof.urdf # for RBDL
+
+# Start & end chain for inverse kinematics
+chain_start: robocare_link0 # base link
+chain_end: right_end_effect_point # end-effector link
+
+# Joint limit
+joint_limit_lower: [-30.0, -170.0, -94.0, -170.0, -47.0, -164.0, -55.0]
+joint_limit_upper: [30.0,  170.0,  100.0, 170.0, 90.0, 170.0, 52.0]
+
+# Link name & dimension for Collision Check
+link_data:
+  link_name: [Waist_Pitch, Waist_Pitch, RShoulder_Pitch, RShoulder_Roll, RElbow_Yaw, RWrist_Roll, RWrist_Roll, RWrist_Roll] # Link name in URDF file
+  link_dimension: [[0.125, 0.125, 0.125], [0.125, 0.12, 0.225], [0.04, 0.04, 0.04], [0.03, 0.05, 0.03], [0.04, 0.08, 0.04], [0.04, 0.04, 0.04], [0.025, 0.03, 0.01], [0.025, 0.030, 0.01]] # Width, Depth, Height
+  link_position: [[0.0, 0.0, 0.3261], [0.0, 0.0, -0.0], [0.0, -0.0, -0.0], [0.0, -0.0, -0.0], [0.0, 0.0, -0.0], [0.0, -0.0, 0.0], [0.0, -0.08, 0.05], [0.0, -0.08, -0.06]] # x, y, z relative to link's center of mass
+  link_orientation: [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0],[-40.0, 0.0, 0.0], [40.0, 0.0, 0.0]] # Roll pitch yaw relative to center of box  

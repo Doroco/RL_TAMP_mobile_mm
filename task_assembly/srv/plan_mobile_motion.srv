@@ -1,0 +1,5 @@
+geometry_msgs/Pose2D current_mobile_state
+geometry_msgs/Pose2D target_mobile_pose
+task_assembly/Obstacle2D[] Obstacles2D
+---
+MobileTrajectory mobile_trajectory

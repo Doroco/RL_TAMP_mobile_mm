@@ -1,0 +1,3 @@
+<launch>
+    <node name="TAMP_Scence" pkg="TAMP_interface" type="TAMP_interface.py" output="screen"/>
+</launch>

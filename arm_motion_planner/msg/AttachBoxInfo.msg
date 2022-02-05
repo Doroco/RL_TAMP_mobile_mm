@@ -1,0 +1,4 @@
+std_msgs/Bool Attach_to_robot
+geometry_msgs/Pose Box_pose
+geometry_msgs/Point Box_dimension
+std_msgs/Bool Right_arm
