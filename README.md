@@ -12,8 +12,5 @@ Reinfore Learning / Mobile manipulator Task Planning implementaion  by using DDP
 
 ## TODO
 
-1. Lazy Collision Check (IRM sturcture)
-- setObstacleRegion() 2D Collision Bound 설정하기
-2. Contrained Motion Planning
-- Door Openning을 실행하기 위해서 Task Constraint 지정 (Task Frame 설정하기)
-- Task Constrined RRT를 시행하기 위해서 기존 Arm motion planner에 First-Order Retraction을 추가로 구현하기 
+1. Planning Scence이 길어서 샘플데이터 모으기힘들다 --> Importance sampling을 적용한다.
+2. Contraints들으 어떻게 Learning할지?
