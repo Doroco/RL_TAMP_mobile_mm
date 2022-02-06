@@ -3,3 +3,4 @@ geometry_msgs/Pose2D target_mobile_pose
 task_assembly/Obstacle2D[] Obstacles2D
 ---
 MobileTrajectory mobile_trajectory
+std_msgs/Bool IsSucceeded

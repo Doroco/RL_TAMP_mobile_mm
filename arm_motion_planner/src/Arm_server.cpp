@@ -33,10 +33,12 @@ private:
         arm_planner_.compute(res.joint_trajectory);
         if (res.joint_trajectory.points.empty())
         {
+            res.IsSucceeded.data = false;
             output_message = "Planning failed";
         }
         else
         {
+            res.IsSucceeded.data = true;
             output_message = "Planning success";
         }
         ROS_INFO("sending back response: [%s]", output_message.c_str() ); // res.q_trajectory.joint_names[0].c_str()

@@ -487,6 +487,7 @@ void ArmPlanner::compute(trajectory_msgs::JointTrajectory& arm_trajectory)
 	// cout << CalcBodyToBaseCoordinates(rbdl_model_, joint_state_.qInit_, body_id_collision_[i], body_com_position_[i], true).transpose()<< endl;
 	// }
 	// Calculate IK solution
+
 	std::vector<VectorXd> q_goal_set;
 	q_goal_set.clear();
 	int nb_of_sols = 0 ;
@@ -545,6 +546,7 @@ void ArmPlanner::compute(trajectory_msgs::JointTrajectory& arm_trajectory)
 				trajectory_generator_ = new Trajectory(Path(wayPoints, 0.1), maxVelocity, maxAcceleration);
 				//	trajectory_generator_->outputPhasePlaneTrajectory();
 				duration_ = trajectory_generator_->getDuration();
+
 				// cout <<"duration" << duration_ << endl;
 				while (playTime_ / 10.0 < duration_)
 				{
@@ -717,7 +719,7 @@ bool ArmPlanner::solveIK(Transform3d pose, Robotmodel& model) // from panda_arm.
 	std::string chain_start = config_.chain_start;
 	std::string chain_end= config_.chain_end;
 
-	TRAC_IK::TRAC_IK tracik_solver(chain_start, chain_end, urdf_param_, 100, eps);
+	TRAC_IK::TRAC_IK tracik_solver(chain_start, chain_end, urdf_param_, 0.005, eps);
 	bool valid = tracik_solver.getKDLChain(IK_chain);
 
 	if (!valid)
@@ -783,17 +785,19 @@ bool ArmPlanner::solveIK(Transform3d pose, Robotmodel& model) // from panda_arm.
 	A.data[8] = target_from_base(2, 2);
 	end_effector_pose.M = A;
 
-	int rc;
+	int rc = 0;
 
 	double total_time = 0;
 	uint success = 0;
-	bool solved = true;
-	while(true) //for (uint i = 0; i < num_samples; i++)
+	bool solved = false;
+
+	for (uint i = 0; i < num_samples; i++)
 	{
-		if(--num_samples == 0){
-			solved = false;
-			break;
-		}
+		// num_samples -= 1;
+		// if(num_samples == 0){
+		// 	solved = false;
+		// 	break;
+		// }
 
 		std::vector<double> R;
 		for (int i = 0; i < IK_chain.getNrOfJoints(); i++)
@@ -808,10 +812,14 @@ bool ArmPlanner::solveIK(Transform3d pose, Robotmodel& model) // from panda_arm.
 			nominal(j) = R[j];
 		}
 
+		
 		//cout <<"iteration?" << endl;
 		double elapsed = 0;
 		//start_time = boost::posix_time::microsec_clock::local_time();
+
 		rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result);
+
+
 		// int CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL::JntArray &q_out, const KDL::Twist& bounds=KDL::Twist::Zero());
 
 		std::vector<double> config;

@@ -28,7 +28,7 @@ public:
     RosPlanningInterface(ros::NodeHandle & nh, const double hz)
     {
 		thread_condition  = false;
-		isSimulationRun = false;
+		isSimulationRun = true;
 		exitFlag = false;	
 		RosVrepBridgePtr cpoy(new RosVrepBridge(nh,hz));
 		rb = cpoy;

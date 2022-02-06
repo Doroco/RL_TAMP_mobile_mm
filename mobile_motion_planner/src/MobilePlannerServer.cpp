@@ -31,7 +31,6 @@ private:
         }
         else
         {
-            //std::cout << res.mobile_trajectory.points[0].x << std::endl;
             output_message = "Planning success";
         }
         ROS_INFO("sending back response: [%s]", output_message.c_str() ); // res.q_trajectory.joint_names[0].c_str()

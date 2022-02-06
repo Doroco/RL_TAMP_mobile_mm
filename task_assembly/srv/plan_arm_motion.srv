@@ -7,3 +7,4 @@ std_msgs/Bool interpolate_path
 std_msgs/Bool plan_only
 ---
 trajectory_msgs/JointTrajectory joint_trajectory
+std_msgs/Bool IsSucceeded

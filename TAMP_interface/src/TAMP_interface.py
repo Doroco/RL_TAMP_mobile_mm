@@ -19,6 +19,7 @@ from task_assembly.srv import base_placement, base_placementRequest, base_placem
 from task_assembly.srv import sim_request, sim_requestRequest, sim_requestResponse
 
 from std_msgs.msg import Bool
+from sensor_msgs.msg import JointState
 from task_assembly.msg import GraspConfigList
 from task_assembly.msg import GraspConfig
 from task_assembly.msg import Obstacle2D
@@ -113,8 +114,9 @@ def mobile_fexibility_check(userdata,response):
 
 def arm_fexibility_check(userdata,response): 
     # print(len(response.mobile_trajectory.points))
-    userdata.mobile_plan_traj.points = response.mobile_trajectory.points
-    if len(userdata.mobile_plan_traj.points) : 
+    userdata.arm_trajectory_res = response.joint_trajectory
+    userdata.planState = response.IsSucceeded
+    if(response.IsSucceeded.data) :
         return "succeeded"
     else :
         return "replanning"
@@ -185,9 +187,9 @@ def main():
 
             # Obstacle in Given Scence
             obs1 = Obstacle2D()
-            obs1.x.data = 2.7251
-            obs1.y.data = -0.5276
-            obs1.radius.data = 0.6
+            obs1.x.data = 2.2250
+            obs1.y.data = -3.2500e-01
+            obs1.radius.data = 0.25
 
             mobile_srv_request.Obstacles2D.append(obs1)
 
@@ -196,9 +198,30 @@ def main():
         @smach.cb_interface(input_keys=['mobile_goal','targetEEpose'])
         def arm_motion_plan_request_cb(userdata, request):
             srv_request = plan_arm_motionRequest()
+
+            userdata.targetEEpose.position.x = userdata.targetEEpose.position.x - 0.30861
+            userdata.targetEEpose.position.z = userdata.targetEEpose.position.z - 0.4405
             srv_request.target_ee_pose = userdata.targetEEpose
             srv_request.current_mobile_state = userdata.mobile_goal.points[-1]
 
+            srv_request.current_joint_state = rospy.wait_for_message("/panda/joint_states",JointState, timeout=5)
+            srv_request.interpolate_path.data = True
+            
+            srv_request.Pose_bound.position_bound_lower.x = -0.35
+            srv_request.Pose_bound.position_bound_lower.y = -0.15
+            srv_request.Pose_bound.position_bound_lower.z = -0.15
+
+            srv_request.Pose_bound.position_bound_upper.x = 0.35
+            srv_request.Pose_bound.position_bound_upper.y = 0.15
+            srv_request.Pose_bound.position_bound_upper.z = 0.15
+
+            srv_request.Pose_bound.orientation_bound_lower.x = -0.05
+            srv_request.Pose_bound.orientation_bound_lower.y = -0.05
+            srv_request.Pose_bound.orientation_bound_lower.z = -0.05
+
+            srv_request.Pose_bound.orientation_bound_upper.x = 0.05
+            srv_request.Pose_bound.orientation_bound_upper.y = 0.05
+            srv_request.Pose_bound.orientation_bound_upper.z = 0.05
             return srv_request
 
         StateMachine.add('basePoseSampler',
@@ -222,22 +245,24 @@ def main():
                     input_keys = ['mobileTarget'],
                     output_keys = ['mobile_plan_traj'],
                     outcomes=['succeeded','replanning']),
-                    transitions={'succeeded':'ControllHuskyInterface',
+                    transitions={'succeeded':'ArmMotionPlanning',
                                  'replanning':'basePoseSampler'},
                     remapping={'mobileTarget':'robotBase', 
                                'mobile_plan_traj':'mobileTraj'})
 
-        # StateMachine.add('ArmMotionPlanning',
-        #         ServiceState('/plan_arm_motion', task_assembly.srv.plan_arm_motion,
-        #             request_cb = arm_motion_plan_request_cb,
-        #             response_cb = arm_fexibility_check,
-        #             input_keys = ['mobile_goal','targetEEpose'],
-        #             output_keys = ['arm_trajectory_res'],
-        #             outcomes=['succeeded','replanning']),
-        #             transitions={'succeeded':'ControllHuskyInterface',
-        #                          'replanning':'basePoseSampler'},
-        #             remapping={'mobile_goal':'mobileTraj', 
-        #                        'targetEEpose':'TCPpose'})
+        StateMachine.add('ArmMotionPlanning',
+                ServiceState('/plan_arm_motion', task_assembly.srv.plan_arm_motion,
+                    request_cb = arm_motion_plan_request_cb,
+                    response_cb = arm_fexibility_check,
+                    input_keys = ['mobile_goal','targetEEpose'],
+                    output_keys = ['arm_trajectory_res','planState'],
+                    outcomes=['succeeded','replanning']),
+                    transitions={'succeeded':'ControllHuskyInterface',
+                                 'replanning':'basePoseSampler'},
+                    remapping={'mobile_goal':'mobileTraj', 
+                               'targetEEpose':'TCPpose',
+                                'arm_trajectory_res':'armTraj',
+                                'planState':'IsSucceeded'})
 
         StateMachine.add('ControllHuskyInterface',SimInterface(),
                         remapping={'simRunState':'mobileTraj'})
