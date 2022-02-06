@@ -83,7 +83,8 @@ void MobilePlanner::initializeData(task_assembly::plan_mobile_motion::Request &r
 task_assembly::MobileTrajectory MobilePlanner::compute() {
 
 	// Plan the trajectory
-
+	// output_trajectory_.points.reserve(1);
+	ROS_INFO("1");
 	if (setupAndSolveNHRRRT(mobile_state_.qInit_, mobile_state_.qGoal_, joint_target2_))
 	{
 		//cout << joint_target2_.size() << endl;
@@ -100,6 +101,7 @@ task_assembly::MobileTrajectory MobilePlanner::compute() {
 
 		Vector2d tangent_;
 		double arc_;
+
 		while (playTime_ / 10.0 < duration_)
 		{
 			
@@ -142,7 +144,7 @@ bool MobilePlanner::setupAndSolveNHRRRT(VectorXd q_start, VectorXd q_goal, Matri
 	nh_rrt_.goal_bias_lower(2) = q_goal(2) - 0.05;
 
 	ofstream outFile("path_result.txt", ios::out); // open file for "writing"
-
+	
 	if (nh_rrt_.solveNHRRT(outFile))
 	{
 		outFile.close();

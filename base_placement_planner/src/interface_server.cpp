@@ -71,6 +71,10 @@ private:
         basePose_planner_->getWorkspaceExtends(minBB,maxBB);
         RobotWorkSpace::WorkspaceGridPtr reachGrid(new RobotWorkSpace::WorkspaceGrid(minBB(0),maxBB(0),minBB(1),maxBB(1),basePose_planner_->getDiscretizeParameterTranslation(),basePose_planner_->getDiscretizeParameterRotation()));
     
+        reachGrid->setObsnum(req.Obstacles2D.size());
+        for(int i = 0; i < req.Obstacles2D.size(); ++i)
+            reachGrid->setObs(req.Obstacles2D[i],i);
+
         for(int i = 0; i < 1 /*GraspNum*/; ++i)
         {
             task_assembly::GraspConfig g = req.targetGrasp.grasps.at(i);

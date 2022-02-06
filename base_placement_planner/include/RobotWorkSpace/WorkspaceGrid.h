@@ -29,7 +29,7 @@
 
 #include "task_assembly/GraspConfig.h"
 #include "task_assembly/GraspConfigList.h"
-
+#include "task_assembly/ObstacleBox2D.h"
 // for visualization
 #include "visualization_msgs/Marker.h"
 #include "visualization_msgs/MarkerArray.h"
@@ -122,6 +122,20 @@ namespace RobotWorkSpace
         Eigen::Vector2f getMin() const;
         Eigen::Vector2f getMax() const;
 
+        struct ObstacleInfo
+        {
+            Eigen::Vector2f minBound;
+            Eigen::Vector2f maxBound;
+        };
+        std::vector<ObstacleInfo> obsBounds;
+        int obsnum;
+
+        void setObs(task_assembly::ObstacleBox2D obs, int idx);
+        void setObsnum(int num)
+        {
+            obsnum = num;
+            obsBounds.reserve(num);
+        };
         /**
          * @brief Creates the intersection between multiple grids into one grid by considering for each x,y position the worst values of all grids.
          * @param reachGrids grids for different grasp poses or object poses

@@ -1,6 +1,6 @@
 std_msgs/Int32 minEntry
 std_msgs/Bool eGridySearch
-task_assembly/Obstacle2D[] Obstacles2D
+task_assembly/ObstacleBox2D[] Obstacles2D
 task_assembly/GraspConfigList targetGrasp
 ---
 geometry_msgs/Pose2D target_mobile_pose

@@ -25,7 +25,8 @@ namespace RobotWorkSpace
         discretizeSize = fDiscretizeSize;
         discretizeStepRotation = fDiscretizeSizeRotation;
         data = nullptr;
-
+        obsnum = 0;
+        
         if (fMinX >= fMaxX || fMinY >= fMaxY)
         {
             THROW_VR_EXCEPTION("ERROR min >= max");
@@ -295,6 +296,17 @@ namespace RobotWorkSpace
             // float z = tmpPos2(2, 3);
             x = tmpPos2(0, 3);
             y = tmpPos2(1, 3);
+
+            bool checkCollision = false;
+            for(int i = 0; i < obsnum; ++i)
+            {
+                if( x >= obsBounds[i].minBound(0) && x <= obsBounds[i].maxBound(0) && y >= obsBounds[i].minBound(1) && y <= obsBounds[i].maxBound(1))
+                    checkCollision = true;
+            }
+
+            if(checkCollision)
+                continue;
+
             Eigen::Matrix3f mat = curBaseRot.block(0,0,3,3);
             Eigen::Quaternionf quat(mat);
             visualization_msgs::Marker node;
@@ -518,6 +530,14 @@ namespace RobotWorkSpace
     Eigen::Vector2f WorkspaceGrid::getMax() const
     {
         return Eigen::Vector2f(maxX, maxY);
+    }
+
+    void WorkspaceGrid::setObs(task_assembly::ObstacleBox2D obs, int idx)
+    {
+        obsBounds[idx].maxBound(0) = obs.maxX.data;
+        obsBounds[idx].maxBound(1) = obs.maxY.data;
+        obsBounds[idx].minBound(0) = obs.minX.data;
+        obsBounds[idx].minBound(1) = obs.minY.data;
     }
 
     WorkspaceGridPtr WorkspaceGrid::MergeWorkspaceGrids(const std::vector<WorkspaceGridPtr> &grids)

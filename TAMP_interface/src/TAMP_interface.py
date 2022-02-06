@@ -22,7 +22,7 @@ from std_msgs.msg import Bool
 from sensor_msgs.msg import JointState
 from task_assembly.msg import GraspConfigList
 from task_assembly.msg import GraspConfig
-from task_assembly.msg import Obstacle2D
+from task_assembly.msg import Obstacle2D, Obstacle3D, ObstacleBox2D
 from task_assembly.msg import MobileTrajectory
 from geometry_msgs.msg import Pose2D, Pose, TransformStamped
 from trajectory_msgs.msg import JointTrajectory
@@ -110,7 +110,11 @@ def base_pose_sampler(userdata,response):
 def mobile_fexibility_check(userdata,response): 
     # print(len(response.mobile_trajectory.points))
     userdata.mobile_plan_traj = response.mobile_trajectory
-    return "succeeded"
+    userdata.planState = response.IsSucceeded
+    if(response.IsSucceeded.data) :
+        return "succeeded"
+    else :
+        return "replanning"
 
 def arm_fexibility_check(userdata,response): 
     # print(len(response.mobile_trajectory.points))
@@ -160,6 +164,13 @@ def main():
             srv_request.minEntry.data = 10
             srv_request.eGridySearch.data = False
             srv_request.targetGrasp = userdata.targetGraspConfig
+
+            ######### Obstacle Impormation #######################################################################################
+            refrige = ObstacleBox2D()
+            refrige.maxX  = 2.2250 + 0.25
+            refrige.maxY  = -0.32500 + 0.25
+            refrige.minX  = 2.2250 - 0.25
+            refrige.minY  = -0.32500 - 0.25
             return srv_request
 
         @smach.cb_interface(input_keys=['mobileTarget'])
@@ -206,7 +217,17 @@ def main():
 
             srv_request.current_joint_state = rospy.wait_for_message("/panda/joint_states",JointState, timeout=5)
             srv_request.interpolate_path.data = True
+
+            obs = Obstacle3D()
+            obs.Box_dimension.x = 0.25
+            obs.Box_dimension.y = 0.25
+            obs.Box_dimension.z = 0.68
             
+            obs.Box_pose.orientation.x = 0.0
+            obs.Box_pose.orientation.y = 0.0
+            obs.Box_pose.orientation.z = 0.0
+            obs.Box_pose.orientation.w = 1.0
+
             srv_request.Pose_bound.position_bound_lower.x = -0.35
             srv_request.Pose_bound.position_bound_lower.y = -0.15
             srv_request.Pose_bound.position_bound_lower.z = -0.15
@@ -243,12 +264,13 @@ def main():
                     request_cb = mobile_motion_plan_request_cb,
                     response_cb = mobile_fexibility_check,
                     input_keys = ['mobileTarget'],
-                    output_keys = ['mobile_plan_traj'],
+                    output_keys = ['mobile_plan_traj','planState'],
                     outcomes=['succeeded','replanning']),
                     transitions={'succeeded':'ArmMotionPlanning',
                                  'replanning':'basePoseSampler'},
                     remapping={'mobileTarget':'robotBase', 
-                               'mobile_plan_traj':'mobileTraj'})
+                               'mobile_plan_traj':'mobileTraj',
+                               'planState':'IsSucceeded'})
 
         StateMachine.add('ArmMotionPlanning',
                 ServiceState('/plan_arm_motion', task_assembly.srv.plan_arm_motion,

@@ -15,3 +15,4 @@ std_msgs/Float32 width # Required aperture (opening width) of the robot hand
 std_msgs/Float32 score # Score assigned to the grasp by the classifier
 
 geometry_msgs/Point sample # point at which the grasp was found
+

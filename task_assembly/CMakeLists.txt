@@ -16,6 +16,7 @@ add_message_files(
  target.msg
  MobileTrajectory.msg
  Obstacle2D.msg
+ ObstacleBox2D.msg
  AttachBoxInfo.msg
  GoalStateInfo.msg
  Obstacle3D.msg

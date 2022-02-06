@@ -37,7 +37,7 @@ bool NonHolonomicRRT::solveNHRRT(std::ostream& sout) {
 	int collision2_ = 0;
 
 	////////////////////////////////////// Main algorithm ////////////////////////
-	while (iter < 10000) {
+	while (iter < 6000) {
 		// random sampling 
 		Vector3d q_rand = generateRandomConfig();
 		// goal-biased sampling
@@ -54,7 +54,6 @@ bool NonHolonomicRRT::solveNHRRT(std::ostream& sout) {
 			collision_ = 0;
 			continue;
 		}
-
 
 		// Get the nearest tree from sampling
 		double mind = 100.0;
