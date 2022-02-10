@@ -33,7 +33,7 @@ private:
 
         do{
             try{
-                // tfListener.waitForTransform("mobile_base", "rgb_optical_frame", ros::Time(0), ros::Duration(1.5));
+                // tfListener.waitForTransform("mobile_base", "rgb_optical_frame", ros::Time(0), ros::Duration(1.5)); //panda_base
                 transformStamped = tfBuffer.lookupTransform("map","rgb_optical_frame",ros::Time(0));
                 GlobaltoArm = tfBuffer.lookupTransform("map","panda_base",ros::Time(0));
             }
@@ -79,27 +79,55 @@ private:
         {
             task_assembly::GraspConfig g = req.targetGrasp.grasps.at(i);
             Eigen::Matrix4f gp = basePose_planner_->getGlobalEEpose(g);
+            
             // std::cout<<gp<<std::endl;
-            reachGrid->setGridPosition(gp(0,3),gp(1,3));
+            reachGrid->setGridPosition(gp(0,3),gp(1,3)); //- 0.30861
             reachGrid->fillGridData(basePose_planner_,g);
             float x,y,r;
             int entries = 0;
-            bool ok = reachGrid->getRandomPos(req.minEntry.data, x, y,r, g,1000,&entries);
+            bool ok = reachGrid->getRandomPos(req.minEntry.data, x, y, r, g,1000,&entries);
+
+            // tmpTrans = (rotMat * T_GA).inverse() * gp;
+            
+            // Eigen::Vector3f T_tmp;
+            // T_tmp << gp(0,3),gp(1,3),gp(2,3);
+            
+            // T_tmp = ( T_GA *rotMat).inverse().linear()*T_tmp + ( T_GA *rotMat).inverse().translation();
+            // tmpTrans(0,3)= T_tmp.x();
+            // tmpTrans(1,3)= T_tmp.y();
+            // tmpTrans(2,3)= T_tmp.z();
+            // tmpTrans.block(0,0,3,3) = gp.block(0,0,3,3) * (T_GA*rotMat).inverse().linear().inverse(); 
+
             if(ok)
             {
-                std::cout << x <<" , " << y <<" , "<< r << " , "<<entries <<std::endl;
-                MathTools::Quaternion quat = MathTools::eigen4f2quat(gp);
-                res.target_ee_pose.position.x = gp(0,3);
-                res.target_ee_pose.position.y = gp(1,3);
-                res.target_ee_pose.position.z = gp(2,3);
+                // Eigen::Affine3f rotMat;
+                // rotMat.linear() = rotateZaxis_f(r); //- 0.249999216
+                
+                // to local
+                Eigen::Matrix4f tmpTrans =  T_GA.inverse() * gp;
+                // r = std::fmod(r,6.28319) - M_PI;
+
+                // x  -=  ( 0.30861 / sqrt(2) ) * cosf(r);
+                // y  -=  ( 0.30861 / sqrt(2) ) * sinf(r);
+
+
+                std::cout << x <<" , " << y <<" , "<< r * 180 / M_PI << " , "<<entries <<std::endl; //- 14.3239
+
+                MathTools::Quaternion quat = MathTools::eigen4f2quat(tmpTrans);
+                res.target_ee_pose.position.x = tmpTrans(0,3);
+                res.target_ee_pose.position.y = tmpTrans(1,3);
+                res.target_ee_pose.position.z = tmpTrans(2,3);
                 res.target_ee_pose.orientation.w = quat.w;
                 res.target_ee_pose.orientation.x = quat.x;
                 res.target_ee_pose.orientation.y = quat.y;
                 res.target_ee_pose.orientation.z = quat.z;
 
+                std::cout<< "target grasp pose : \n"<<tmpTrans<<std::endl;
+                std::cout<< "global grasp pose : \n"<<gp<<std::endl;
+
                 res.target_mobile_pose.x = x;
                 res.target_mobile_pose.y = y;
-                res.target_mobile_pose.theta = r;
+                res.target_mobile_pose.theta = r; //- 0.2499992167
                 res.IsSucceeded.data = true;
             }
             else

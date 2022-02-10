@@ -1,10 +1,11 @@
 #!/usr/bin/env python
+from cmath import cos
 from operator import imod
 import numpy
 import rospy
 
 import threading
-
+import math
 import smach
 import numpy
 from smach import StateMachine, Concurrence
@@ -61,23 +62,23 @@ class getRandomWork(smach.State) :
 
         ####### define known grasp pose ######################
         tmpGrasp = GraspConfig()
-        tmpGrasp.position.x = 0.005349214755890379
-        tmpGrasp.position.y = 0.29167141119290857
-        tmpGrasp.position.z = 3.045161183218673
-        tmpGrasp.approach.x = 0.0016649097536617556
-        tmpGrasp.approach.y = 0.0023747117365735242
-        tmpGrasp.approach.z = 0.9999957944009967
-        tmpGrasp.binormal.x = 0.9999985956127705
-        tmpGrasp.binormal.y = -0.00019591173747848635
-        tmpGrasp.binormal.z = -0.0016644491815872556
-        tmpGrasp.axis.x = 0.00019195832654583298
-        tmpGrasp.axis.y = 0.9999971611773502
-        tmpGrasp.axis.z = -0.002375034576921272
-        tmpGrasp.width.data = 0.012007035315036774
-        tmpGrasp.score.data = -182.82186889648438
-        tmpGrasp.sample.x = -0.001284144353121519
-        tmpGrasp.sample.y = 0.2917202115058899
-        tmpGrasp.sample.z = 3.0651721954345703
+        tmpGrasp.position.x = 0.011554762191001828
+        tmpGrasp.position.y = 0.2758585234757614
+        tmpGrasp.position.z = 2.925304418755222
+        tmpGrasp.approach.x = 0.0
+        tmpGrasp.approach.y = 0.0
+        tmpGrasp.approach.z = 1.0
+        tmpGrasp.binormal.x = 1.0
+        tmpGrasp.binormal.y = 0.0
+        tmpGrasp.binormal.z = 0.0
+        tmpGrasp.axis.x = 0.0
+        tmpGrasp.axis.y = 1.0
+        tmpGrasp.axis.z = 0.0
+        tmpGrasp.width.data = 0.012032686732709408
+        tmpGrasp.score.data = -1328.9588623046875
+        tmpGrasp.sample.x = 0.003933435305953026
+        tmpGrasp.sample.y = 0.2767361104488373
+        tmpGrasp.sample.z = 3.065300226211548
         self.doorHandle.grasps.append(tmpGrasp)
 
     def execute(self, userdata) :
@@ -93,10 +94,35 @@ class SimInterface(smach.State):
     def __init__(self):
         smach.State.__init__(self, 
                                 outcomes=['succeeded'],
-                                input_keys=['simRunState'])
+                                input_keys=['mobileState','armState','targetState'])
+
+        self.armTrajPub = rospy.Publisher("/panda/joint_trajectory",JointTrajectory,queue_size = 10)
+        self.mobileTrajPub = rospy.Publisher("/husky/mobile_trajectory",MobileTrajectory,queue_size = 10)
+        
     def execute(self, userdata) :
-        print(len(userdata.simRunState.points))
+        r = rospy.Rate(10) 
+
+        while self.mobileTrajPub.get_num_connections == 0 :
+            r.sleep()
+
+        mobileTrajectory = MobileTrajectory()
+        mobileTrajectory = userdata.mobileState
+        mobileTrajectory.points[-1].x = userdata.targetState.x
+        mobileTrajectory.points[-1].y = userdata.targetState.y
+        mobileTrajectory.points[-1].theta = userdata.targetState.theta
+        self.mobileTrajPub.publish(mobileTrajectory)
+
+
+        while self.armTrajPub.get_num_connections == 0 :
+            r.sleep()
+
+        armTrajectory = JointTrajectory()
+        armTrajectory = userdata.armState
+
+        self.armTrajPub.publish(armTrajectory)
+        
         return "succeeded"
+
 
 def base_pose_sampler(userdata,response): 
     if response.IsSucceeded.data :
@@ -109,9 +135,9 @@ def base_pose_sampler(userdata,response):
 
 def mobile_fexibility_check(userdata,response): 
     # print(len(response.mobile_trajectory.points))
-    userdata.mobile_plan_traj = response.mobile_trajectory
     userdata.planState = response.IsSucceeded
     if(response.IsSucceeded.data) :
+        userdata.mobile_plan_traj = response.mobile_trajectory
         return "succeeded"
     else :
         return "replanning"
@@ -161,16 +187,18 @@ def main():
         @smach.cb_interface(input_keys=['targetGraspConfig'])
         def base_pose_sampler_request_cb(userdata, request):
             srv_request = base_placementRequest()
-            srv_request.minEntry.data = 10
+            srv_request.minEntry.data = 5
             srv_request.eGridySearch.data = False
             srv_request.targetGrasp = userdata.targetGraspConfig
 
             ######### Obstacle Impormation #######################################################################################
-            refrige = ObstacleBox2D()
-            refrige.maxX  = 2.2250 + 0.25
-            refrige.maxY  = -0.32500 + 0.25
-            refrige.minX  = 2.2250 - 0.25
-            refrige.minY  = -0.32500 - 0.25
+            # refrige = ObstacleBox2D()
+            # refrige.maxX.data  = 2.2250 + 0.25
+            # refrige.maxY.data  = -0.32500 + 0.25
+            # refrige.minX.data  = 2.2250 - 0.25
+            # refrige.minY.data  = -0.32500 - 0.25
+
+            # srv_request.Obstacles2D.append(refrige)
             return srv_request
 
         @smach.cb_interface(input_keys=['mobileTarget'])
@@ -196,37 +224,56 @@ def main():
             mobile_srv_request.target_mobile_pose.y = userdata.mobileTarget.y
             mobile_srv_request.target_mobile_pose.theta = userdata.mobileTarget.theta
 
+            if(mobile_srv_request.target_mobile_pose.theta > math.pi) :
+                mobile_srv_request.target_mobile_pose.theta = mobile_srv_request.target_mobile_pose.theta - 2 * math.pi
+
+            mobile_srv_request.target_mobile_pose.x = mobile_srv_request.target_mobile_pose.x - 0.31861 * math.cos(mobile_srv_request.target_mobile_pose.theta)
+            mobile_srv_request.target_mobile_pose.y = mobile_srv_request.target_mobile_pose.y - 0.31861 * math.sin(mobile_srv_request.target_mobile_pose.theta)
+
+            userdata.mobileTarget.x  = mobile_srv_request.target_mobile_pose.x 
+            userdata.mobileTarget.y  = mobile_srv_request.target_mobile_pose.y
+            userdata.mobileTarget.theta = mobile_srv_request.target_mobile_pose.theta
+
             # Obstacle in Given Scence
             obs1 = Obstacle2D()
-            obs1.x.data = 2.2250
-            obs1.y.data = -3.2500e-01
-            obs1.radius.data = 0.25
+            obs1.x.data = 2.2251
+            obs1.y.data = -0.3276
+            obs1.radius.data = 0.75
 
             mobile_srv_request.Obstacles2D.append(obs1)
 
             return mobile_srv_request
 
-        @smach.cb_interface(input_keys=['mobile_goal','targetEEpose'])
+        @smach.cb_interface(input_keys=['mobile_goal','targetEEpose','targetGoal'])
         def arm_motion_plan_request_cb(userdata, request):
             srv_request = plan_arm_motionRequest()
 
-            userdata.targetEEpose.position.x = userdata.targetEEpose.position.x - 0.30861
-            userdata.targetEEpose.position.z = userdata.targetEEpose.position.z - 0.4405
             srv_request.target_ee_pose = userdata.targetEEpose
-            srv_request.current_mobile_state = userdata.mobile_goal.points[-1]
+
+            srv_request.current_mobile_state.x = userdata.targetGoal.x
+            srv_request.current_mobile_state.y = userdata.targetGoal.y
+            srv_request.current_mobile_state.theta = userdata.targetGoal.theta
+
+            if(srv_request.current_mobile_state.theta > math.pi) :
+                srv_request.current_mobile_state.theta = srv_request.current_mobile_state.theta - 2 * math.pi
+
+            srv_request.current_mobile_state.x = srv_request.current_mobile_state.x + 0.30861 * math.cos(srv_request.current_mobile_state.theta)
+            srv_request.current_mobile_state.y = srv_request.current_mobile_state.y + 0.30861 * math.sin(srv_request.current_mobile_state.theta)
 
             srv_request.current_joint_state = rospy.wait_for_message("/panda/joint_states",JointState, timeout=5)
-            srv_request.interpolate_path.data = True
+            srv_request.interpolate_path.data = False
 
-            obs = Obstacle3D()
-            obs.Box_dimension.x = 0.25
-            obs.Box_dimension.y = 0.25
-            obs.Box_dimension.z = 0.68
-            
-            obs.Box_pose.orientation.x = 0.0
-            obs.Box_pose.orientation.y = 0.0
-            obs.Box_pose.orientation.z = 0.0
-            obs.Box_pose.orientation.w = 1.0
+            # obs = Obstacle3D()
+            # obs.Box_dimension.x = 0.25
+            # obs.Box_dimension.y = 0.25
+            # obs.Box_dimension.z = 0.68
+            # obs.Box_pose.position.x = 2.2250
+            # obs.Box_pose.position.y = -0.32500
+            # obs.Box_pose.position.z =  0.69004
+            # obs.Box_pose.orientation.x = 0.0
+            # obs.Box_pose.orientation.y = 0.0
+            # obs.Box_pose.orientation.z = 0.0
+            # obs.Box_pose.orientation.w = 1.0
 
             srv_request.Pose_bound.position_bound_lower.x = -0.35
             srv_request.Pose_bound.position_bound_lower.y = -0.15
@@ -276,7 +323,7 @@ def main():
                 ServiceState('/plan_arm_motion', task_assembly.srv.plan_arm_motion,
                     request_cb = arm_motion_plan_request_cb,
                     response_cb = arm_fexibility_check,
-                    input_keys = ['mobile_goal','targetEEpose'],
+                    input_keys = ['mobile_goal','targetEEpose','targetGoal'],
                     output_keys = ['arm_trajectory_res','planState'],
                     outcomes=['succeeded','replanning']),
                     transitions={'succeeded':'ControllHuskyInterface',
@@ -284,10 +331,13 @@ def main():
                     remapping={'mobile_goal':'mobileTraj', 
                                'targetEEpose':'TCPpose',
                                 'arm_trajectory_res':'armTraj',
+                                'targetGoal':'robotBase',
                                 'planState':'IsSucceeded'})
 
         StateMachine.add('ControllHuskyInterface',SimInterface(),
-                        remapping={'simRunState':'mobileTraj'})
+                        remapping={'mobileState':'mobileTraj',
+                                    'armState':'armTraj',
+                                    'targetState':'robotBase'})
 
     # Attach a SMACH introspection server
     sis = IntrospectionServer('RL_SIM', sm, '/TAMP_start')

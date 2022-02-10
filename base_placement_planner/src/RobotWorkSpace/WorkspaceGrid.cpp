@@ -20,8 +20,13 @@ namespace RobotWorkSpace
         maxX = fMaxX;
         minY = fMinY;
         maxY = fMaxY;
+
         minR = 0.0;
         maxR = 2.0 * M_PI;
+
+        // minR = -M_PI;
+        // maxR = M_PI;
+
         discretizeSize = fDiscretizeSize;
         discretizeStepRotation = fDiscretizeSizeRotation;
         data = nullptr;
@@ -297,6 +302,9 @@ namespace RobotWorkSpace
             x = tmpPos2(0, 3);
             y = tmpPos2(1, 3);
 
+            // x  -=   0.30861 * cosf(curR);
+            // y  -=   0.30861 * sinf(curR);
+
             bool checkCollision = false;
             for(int i = 0; i < obsnum; ++i)
             {
@@ -409,7 +417,7 @@ namespace RobotWorkSpace
             {
                 storeXGlobal = minX + ((float)x + 0.5f) * discretizeSize;
                 storeYGlobal = minY + ((float)y + 0.5f) * discretizeSize;
-                storeRGlobal = std::fmod(minR + ((float)r + 0.5f) * discretizeStepRotation, maxR);
+                storeRGlobal = std::fmod(minR + ((float)r + 0.0f) * discretizeStepRotation, maxR);
 
                 return true;
             }
@@ -445,7 +453,7 @@ namespace RobotWorkSpace
             {
                 storeXGlobal = minX + ((float)x + 0.5f) * discretizeSize;
                 storeYGlobal = minY + ((float)y + 0.5f) * discretizeSize;
-                storeRGlobal = std::fmod(minR + ((float)r + 0.5f) * discretizeStepRotation,maxR);
+                storeRGlobal = std::fmod(minR + ((float)r + 0.0f) * discretizeStepRotation,maxR);
 
                 return true;
             }
@@ -474,7 +482,7 @@ namespace RobotWorkSpace
         }
 
         Eigen::Matrix4f graspGlobal = ws->getGlobalEEpose(g);
-
+        // Eigen::Matrix4f local = ws->getToGlobalTransformation();
         // Eigen::Vector3f minBB, maxBB;
         //  ws->getWorkspaceExtends(minBB, maxBB);  
         // float sizeZ = maxBB[2] - minBB[2];
@@ -484,13 +492,16 @@ namespace RobotWorkSpace
         // {
         //     z  = minBB[2] + c *  discretizeSize;
 
-        for(float RotZ = minR; RotZ < maxR; RotZ += discretizeStepRotation)
-        {
+        // for(float RotZ = minR; RotZ < maxR; RotZ += discretizeStepRotation)
+        // {
             // WorkspaceRepresentationPtr wsTmp = ws->clone_ws();
+            float RotZ = 0.0;
+            
             Eigen::Matrix4f rotMat;
             rotMat.setIdentity();
             rotMat.block(0,0,3,3) = rotateZaxis_f(RotZ);
-            // std::cout<<rotMat<<std::endl;
+            // rotMat = local * rotMat * local.inverse();
+            std::cout<<rotMat<<std::endl;
             ws->rotateLocalBase(rotMat);
             WorkspaceRepresentation::WorkspaceCut2DPtr cutXY = ws->createCut(graspGlobal, discretizeSize, false);
             // RM Visualization Here IRM --> Date in here
@@ -499,7 +510,7 @@ namespace RobotWorkSpace
             setEntries(transformations, graspGlobal, g, rotMat, RotZ);
             ws->rotateLocalBase(rotMat.inverse());
         // }
-        }
+        // }
         return true;
     }
 

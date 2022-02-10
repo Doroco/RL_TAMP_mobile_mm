@@ -52,10 +52,10 @@ Controller::Controller()
 	bp_.b = 0.545; // width
 	bp_.r = 0.165; // wheel raidus
 	bp_.c = bp_.r / (2.0 * bp_.b);
-	bp_.d = 0.35;
+	bp_.d = 0.35; //축과 모바일 중심사이 거리
 
 	bp_.maxVel = 1.2;
-	bp_.distThre = 0.05;
+	bp_.distThre = 0.05; //0.05
 
 	mobile_S.resize(2, 2);
 	mobile_S.setZero();
@@ -84,6 +84,8 @@ Controller::Controller()
 	mobile_exec_ = false;
 
 	initialize_ = true;
+
+	mobilePlanEnded = false;
 }
 Controller::~Controller()
 {
@@ -143,54 +145,66 @@ void Controller::compute()
 	}
 
 	//////////////////////////////////////////////////////////////////////
-
-	if (!jt_l_.q_traj_.points.empty())
+	if(mobilePlanEnded)
 	{
-
-		jt_l_.joint_flag = false;
-
-		if (jt_l_.nb_of_points != jt_l_.traj_index)
-			for (int i = 0; i < dof; i++)
-				jt_l_.q_(i) = jt_l_.q_traj_.points[jt_l_.traj_index].positions[i] * DEGREE;
-
-		jt_l_.joint_flag = jointPIDControl(0.01, true); //2.0
-
-		//std::cout << jt_l_.desired_q_.transpose() << std::endl;
-
-		if (jt_l_.joint_flag && jt_l_.traj_index < jt_l_.nb_of_points)
+		if (!jt_l_.q_traj_.points.empty())
 		{
-			jt_l_.controlStartTime_ = playTime_;
-			jt_l_.traj_index++;
+			jt_l_.joint_flag = false;
 
-			js_l_.qInit_ = js_l_.q_;
+			if (jt_l_.nb_of_points != jt_l_.traj_index)
+				for (int i = 0; i < dof; i++)
+					jt_l_.q_(i) = jt_l_.q_traj_.points[jt_l_.traj_index].positions[i] * DEGREE;
+
+			jt_l_.joint_flag = jointPIDControl(0.01, true); //2.0
+
+			//std::cout << jt_l_.desired_q_.transpose() << std::endl;
+
+			if (jt_l_.joint_flag && jt_l_.traj_index < jt_l_.nb_of_points)
+			{
+				jt_l_.controlStartTime_ = playTime_;
+				jt_l_.traj_index++;
+
+				js_l_.qInit_ = js_l_.q_;
+			}
+			else
+			{
+				// jt_l_.q_traj_.points.clear();
+			}
 		}
-	}
 
-	if (!jt_r_.q_traj_.points.empty())
-	{
-		jt_r_.joint_flag = false;
-
-		if (jt_r_.nb_of_points != jt_r_.traj_index)
-			for (int i = 0; i < dof; i++)
-				jt_r_.q_(i) = jt_r_.q_traj_.points[jt_r_.traj_index].positions[i] * DEGREE;
-
-		jt_r_.joint_flag = jointPIDControl(0.01, false); //2.0
-
-		//std::cout << jt_r_.desired_q_.transpose() << std::endl;
-
-		if (jt_r_.joint_flag && jt_r_.traj_index < jt_r_.nb_of_points)
+		if (!jt_r_.q_traj_.points.empty())
 		{
-			jt_r_.controlStartTime_ = playTime_;
-			jt_r_.traj_index++;
-			//std::cout << jt_r_.traj_index << std::endl;
+			jt_r_.joint_flag = false;
 
-			js_r_.qInit_ = js_r_.q_;
-			js_r_.qdotInit_ = js_r_.qdot_;
+			if (jt_r_.nb_of_points != jt_r_.traj_index)
+				for (int i = 0; i < dof; i++)
+					jt_r_.q_(i) = jt_r_.q_traj_.points[jt_r_.traj_index].positions[i] * DEGREE;
+
+			jt_r_.joint_flag = jointPIDControl(0.01, false); //2.0
+
+			//std::cout << jt_r_.desired_q_.transpose() << std::endl;
+
+			if (jt_r_.joint_flag && jt_r_.traj_index < jt_r_.nb_of_points)
+			{
+				jt_r_.controlStartTime_ = playTime_;
+				jt_r_.traj_index++;
+				//std::cout << jt_r_.traj_index << std::endl;
+
+				js_r_.qInit_ = js_r_.q_;
+				js_r_.qdotInit_ = js_r_.qdot_;
+			}
+			else
+			{
+				// jt_r_.q_traj_.points.clear();
+			}
 		}
 	}
 
 	if (!bt_.q_traj_.points.empty())
+	{
 		mobileController_PurePursuit();
+		// mobileController_Kanayama();
+	}
 
 	cnt_++;
 }
@@ -205,16 +219,17 @@ bool Controller::mobileController_PurePursuit()
 
 	//	std::cout << bt_.ctrl_mode << std::endl;
 	//	std::cout << "x \t" << bt_.q_traj_.points[bt_.traj_index].x << "\t" << "y \t" << bt_.q_traj_.points[bt_.traj_index].y << std::endl;
-
+	double errorMeasure = 0.0;
+	mobilePlanEnded = false;
 
 	if ((bt_.ctrl_mode == 1))
 	{
-
+		
 		bp_.distToTarget = sqrt(pow((bt_.q_traj_.points[bt_.traj_index].x - bs_.pose_.x), 2) + pow((bt_.q_traj_.points[bt_.traj_index].y - bs_.pose_.y), 2));
 
 		if ((bt_.nb_of_points - 1) <= bt_.traj_index)
 		{
-			bp_.distThre = 0.01;
+			bp_.distThre = 0.015; //0.01
 		}
 
 		if (bp_.distToTarget < bp_.distThre)
@@ -242,6 +257,7 @@ bool Controller::mobileController_PurePursuit()
 		mobile_S(1, 0) = bp_.c * (bp_.b * sin(bs_.pose_.theta) + bp_.d * cos(bs_.pose_.theta));
 		mobile_S(1, 1) = bp_.c * (bp_.b * sin(bs_.pose_.theta) - bp_.d * cos(bs_.pose_.theta));
 
+		// 인풋 순서 WR WL
 		//mobile_v_err(0) = -(bs_.pose_(0) - bs_.pose_pre_(0)) / Hz;
 		//mobile_v_err(1) = -(bs_.pose_(1) - bs_.pose_pre_(1)) / Hz;
 
@@ -249,6 +265,8 @@ bool Controller::mobileController_PurePursuit()
 		{
 			bt_.poseTarget_.x = bt_.q_traj_.points[bt_.traj_index].x;
 			bt_.poseTarget_.y = bt_.q_traj_.points[bt_.traj_index].y;
+
+			std::cout<<bt_.poseTarget_<<std::endl;
 
 			bt_.controlStartTime_ = playTime_;
 
@@ -260,14 +278,22 @@ bool Controller::mobileController_PurePursuit()
 
 		//bt_.mobile_flag = mobilePIDControl(0.5); //cubic trajectory
 
+		std::cout << "x target :  " << bt_.poseTarget_.x  << std::endl;
+		std::cout << "y target :  " << bt_.poseTarget_.y  << std::endl;
+
+		// PD Controll
 		mobile_p_err(0) = 2.0 * (bt_.poseTarget_.x - bs_.pose_.x) - 0.5 * bs_.twist_.linear.x;
 		mobile_p_err(1) = 2.0 * (bt_.poseTarget_.y - bs_.pose_.y) - 0.5 * bs_.twist_.linear.y;
 
 		std::cout << "pos error" << mobile_p_err.transpose() << std::endl;
 
 		//mobile_v = mobile_S.inverse() * (0.7 * mobile_p_err + 0.05 * mobile_v_err);
+
+		// 시뮬레이션이기 때문에 반대로 구해주어야 한다.
 		mobile_v = mobile_S.inverse() * (mobile_p_err);
 
+		// WR WL
+		// 최대 속도를 설정
 		for (int i = 0; i < 2; i++)
 		{
 			if (abs(mobile_v(i)) > 4.0)
@@ -277,8 +303,8 @@ bool Controller::mobileController_PurePursuit()
 		}
 		//fprintf(fp1, "%f\t %f\t %f\t %f\t %f\t %f\t \n", bt_.poseTarget_.x,  bt_.poseTarget_.y , bs_.pose_.x, bs_.pose_.y, mobile_v(0), mobile_v(1));
 
-		bt_.desired_vel_(0) = mobile_v(1);
-		bt_.desired_vel_(1) = mobile_v(0);
+		bt_.desired_vel_(0) = mobile_v(1);  //왼 
+		bt_.desired_vel_(1) = mobile_v(0);  //오
 		bt_.desired_vel_(2) = mobile_v(0);
 		bt_.desired_vel_(3) = mobile_v(1);
 
@@ -291,35 +317,68 @@ bool Controller::mobileController_PurePursuit()
 			bs_.poseInit_.theta = bs_.pose_.theta;
 			bt_.mobile_flag = false;
 		}
-		bt_.poseCubic_.theta = cubicSpline(playTime_, bt_.controlStartTime_, bt_.controlStartTime_ + 5.0, bs_.poseInit_.theta, 0.0, bt_.poseGoal_.theta, 0.0);
+
+		bt_.poseTarget_.theta = bt_.q_traj_.points.back().theta;
+		errorMeasure = bt_.poseTarget_.theta;
+
+		if(bt_.poseTarget_.theta  > M_PI)
+		{
+			errorMeasure = bt_.poseTarget_.theta - 2 * M_PI;
+		}
+		
+		bt_.poseCubic_.theta = cubicSpline(playTime_, bt_.controlStartTime_, bt_.controlStartTime_ + 5.0, bs_.poseInit_.theta, 0.0, errorMeasure, 0.0); //bt_.poseGoal_.theta,
 
 		bp_.oriErr = bs_.pose_.theta - bt_.poseCubic_.theta;
-		
-		std::cout << "ori error" << - bp_.oriErr  << std::endl;
-		bp_.oriErr = 3 * normAngle(bp_.oriErr, -M_PI); // rotation gain: 3
 
-		
-		if (abs(bp_.oriErr) > 0.5)
+		// errorMeasure = -fmod(bp_.oriErr, 2.0* M_PI);
+		std::cout << "ori target  " << errorMeasure * 180 / M_PI << std::endl;
+		std::cout << "ori error  " << fabs(errorMeasure - bs_.pose_.theta) * 180 / M_PI << std::endl;
+
+		if(fabs(errorMeasure - bs_.pose_.theta) < 0.02)
 		{
-			bp_.oriErr = 0.5 * bp_.oriErr / abs(bp_.oriErr); // max_vel : 1
+			bt_.ctrl_mode = 3;
+			// stop
+			bt_.desired_vel_(0) = 0.0;
+			bt_.desired_vel_(1) = 0.0;
+			bt_.desired_vel_(2) = 0.0;
+			bt_.desired_vel_(3) = 0.0;
 		}
-		bt_.desired_vel_(0) = 1.0 * bp_.oriErr;
-		bt_.desired_vel_(1) = -1.0 * bp_.oriErr;
-		bt_.desired_vel_(2) = -1.0 * bp_.oriErr;
-		bt_.desired_vel_(3) = 1.0 * bp_.oriErr;
+		else
+		{
+			bp_.oriErr = 8 * normAngle(bp_.oriErr, -M_PI); // rotation gain: 3
 
-		//cout << "base ori: " << bs_.pose_.theta << endl;
+			
+			if (abs(bp_.oriErr) > 2.0) //0.5
+			{
+				bp_.oriErr = 0.5 * bp_.oriErr / abs(bp_.oriErr); // max_vel : 1
+			}
 
+			//회전 하기위해 반대방향으로
+			bt_.desired_vel_(0) = 1.0 * bp_.oriErr;
+			bt_.desired_vel_(1) = -1.0 * bp_.oriErr;
+			bt_.desired_vel_(2) = -1.0 * bp_.oriErr;
+			bt_.desired_vel_(3) = 1.0 * bp_.oriErr;
+		}
+		cout << "base ori: " << bs_.pose_.theta * 180 / M_PI << endl;
 		break;
 
 	default:
-
+		// if(!bt_.q_traj_.points.empty())
+		// {
+		// 	bt_.ctrl_mode = 1;
+		// 	mobilePlanEnded = false;
+		// }	
+		// else
+		// {
+			mobilePlanEnded = true;
+		// }
 		break;
 	}
 
 	// fprintf(fp1, "%f\t %f\t %f\t %f\t %f\t %f\t \n", bt_.poseTarget_.x,  bt_.poseTarget_.y ,bt_.poseGoal_.theta, bs_.pose_.x, bs_.pose_.y,bs_.pose_.theta);
 
 	// bs_.pose_pre_ = bs_.pose_;
+	return true;
 }
 
 bool Controller::mobileController_Kanayama()
@@ -329,20 +388,34 @@ bool Controller::mobileController_Kanayama()
 
 	// Calculate error posture
 	bs_.Rot_global_ = rotateZaxis(bs_.pose_.theta);
+
+	// pose_desired - pose_current
 	bs_.pose_error_global_(0) = bt_.q_traj_.points[bt_.traj_index].x - bs_.pose_.x;
 	bs_.pose_error_global_(1) = bt_.q_traj_.points[bt_.traj_index].y - bs_.pose_.y;
 	// TODO : normAngle
-	bs_.pose_error_global_(2) = bt_.q_traj_.points[bt_.traj_index].theta - bs_.pose_.theta; 
+	bs_.pose_error_global_(2) = bt_.q_traj_.points[bt_.traj_index].theta - bs_.pose_.theta;
+	// double theata_error = bt_.q_traj_.points[bt_.traj_index].theta - bs_.pose_.theta;
+	// bs_.pose_error_global_(2) = normAngle(theata_error,- M_PI); 
+
+	// local 시점으로 보기위해서 인버스로 곱해버려
 	bs_.pose_error_local_ = bs_.Rot_global_.transpose()*bs_.pose_error_global_;
 
 	std::cout << "del x \t" << bs_.pose_error_local_(0) << "\t" << "del y \t" << bs_.pose_error_local_(1) << "\t" << "del t \t" << bs_.pose_error_local_(2) << std::endl;
-	std::cout << bp_.distToTarget << std::endl;
+	// std::cout << bp_.distToTarget << std::endl;
+
 	bt_.v_r = 0.3;
 	bt_.w_r = 0.2;
+	// bt_.v_r = sqrt(pow((bt_.q_traj_.points[bt_.traj_index].x - bs_.pose_.x), 2) + pow((bt_.q_traj_.points[bt_.traj_index].y - bs_.pose_.y), 2) + 0.1*pow((bt_.q_traj_.points[bt_.traj_index].theta - bs_.pose_.theta), 2));
+	// bt_.w_r = bs_.pose_error_global_(2);
 
-	bp_.Kx = 30.0;
+	bp_.Kx = 15.0;
 	bp_.Ky = 16.0;
-	bp_.Ktheta = 8.0;
+	bp_.Ktheta =4.0;
+	
+	// bp_.Kx = 8.5;
+	// bp_.Ky = 4.0;
+	// bp_.Ktheta = 8.0;
+
 	// damping ratio = Ktheta / (2*sqrt(Ky))
 	// Ktheta.^2 = 4 Ky (critical damping)
 	
@@ -359,6 +432,7 @@ bool Controller::mobileController_Kanayama()
 
 		// if ((bt_.nb_of_points - 1) <= bt_.traj_index)
 		// {
+		// 	// init 0.05r
 		// 	bp_.distThre = 0.01;
 		// }
 
@@ -384,6 +458,8 @@ bool Controller::mobileController_Kanayama()
 
 		bt_.desired_wheel_ = bp_.vel_to_wheel.inverse()*bt_.desired_v_w_;
 		std::cout << "wheel" << bt_.desired_wheel_.transpose() << std::endl;
+		std::cout << "position error" << bp_.distToTarget << std::endl;
+		// std::cout << "idx" << bt_.traj_index<<" / "<< bt_.nb_of_points <<std::endl;
 		bt_.desired_vel_(0) = bt_.desired_wheel_(1);
 		bt_.desired_vel_(1) = bt_.desired_wheel_(0);
 		bt_.desired_vel_(2) = bt_.desired_wheel_(0);
@@ -425,6 +501,8 @@ bool Controller::mobileController_Kanayama()
 		break;
 	}
 	// bs_.pose_pre_ = bs_.pose_;
+
+	return true;
 }
 
 bool Controller::jointPIDControl(double duration, bool left)

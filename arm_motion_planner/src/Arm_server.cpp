@@ -29,7 +29,10 @@ private:
         ROS_INFO("Generating trajectory.... ");
         arm_planner_.initializeData(req);
 
-        std::string output_message ;
+        // std::cout<<req.current_mobile_state.theta<<std::endl;
+        // std::cout<<req.target_ee_pose<<std::endl;
+
+        std::string output_message;
         arm_planner_.compute(res.joint_trajectory);
         if (res.joint_trajectory.points.empty())
         {

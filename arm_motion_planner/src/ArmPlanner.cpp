@@ -708,7 +708,7 @@ void ArmPlanner::compute(trajectory_msgs::JointTrajectory& arm_trajectory)
 bool ArmPlanner::solveIK(Transform3d pose, Robotmodel& model) // from panda_arm.xacro
 {
 	double eps = 5e-3;
-	double num_samples = 10;
+	double num_samples = 200; 
 
 	// Set up KDL IK
 	// KDL::ChainFkSolverPos_recursive fk_solver(IK_chain);									  // Forward kin. solver
@@ -763,9 +763,9 @@ bool ArmPlanner::solveIK(Transform3d pose, Robotmodel& model) // from panda_arm.
 
 	target_from_base = base_global.inverse() * target_global;
 
-	//cout << "target_global" << target_global << endl;
-	//cout << "base_global" << base_global << endl;
-	//cout << "target_from_base \n" << target_from_base << endl;
+	cout << "target_global \n" << target_global << endl;
+	cout << "base_global \n" << base_global << endl;
+	cout << "target_from_base \n" << target_from_base << endl;
 
 	for (int i = 0; i < 3; i++)
 	{

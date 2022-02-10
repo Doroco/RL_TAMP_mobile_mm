@@ -128,5 +128,6 @@ public:
 	MatrixXd mobile_v;
 	MatrixXd mobile_p_err;
 
+	bool mobilePlanEnded;
 };
 #endif
