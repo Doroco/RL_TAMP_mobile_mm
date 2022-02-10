@@ -104,7 +104,7 @@ private:
                 // rotMat.linear() = rotateZaxis_f(r); //- 0.249999216
                 
                 // to local
-                Eigen::Matrix4f tmpTrans =  T_GA.inverse() * gp;
+                Eigen::Matrix4f tmpTrans =  T_GA.inverse() * gp; //
                 // r = std::fmod(r,6.28319) - M_PI;
 
                 // x  -=  ( 0.30861 / sqrt(2) ) * cosf(r);
@@ -113,9 +113,9 @@ private:
 
                 std::cout << x <<" , " << y <<" , "<< r * 180 / M_PI << " , "<<entries <<std::endl; //- 14.3239
 
-                MathTools::Quaternion quat = MathTools::eigen4f2quat(tmpTrans);
-                res.target_ee_pose.position.x = tmpTrans(0,3);
-                res.target_ee_pose.position.y = tmpTrans(1,3);
+                MathTools::Quaternion quat = MathTools::eigen4f2quat(gp);
+                res.target_ee_pose.position.x = gp(0,3);
+                res.target_ee_pose.position.y = gp(1,3);
                 res.target_ee_pose.position.z = tmpTrans(2,3);
                 res.target_ee_pose.orientation.w = quat.w;
                 res.target_ee_pose.orientation.x = quat.x;
