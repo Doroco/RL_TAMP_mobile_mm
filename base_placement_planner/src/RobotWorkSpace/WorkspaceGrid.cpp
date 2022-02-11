@@ -492,10 +492,10 @@ namespace RobotWorkSpace
         // {
         //     z  = minBB[2] + c *  discretizeSize;
 
-        // for(float RotZ = minR; RotZ < maxR; RotZ += discretizeStepRotation)
-        // {
+        for(float RotZ = minR; RotZ < maxR; RotZ += discretizeStepRotation)
+        {
             // WorkspaceRepresentationPtr wsTmp = ws->clone_ws();
-            float RotZ = 0.0;
+            // float RotZ = 0.0;
             
             Eigen::Matrix4f rotMat;
             rotMat.setIdentity();
@@ -510,7 +510,7 @@ namespace RobotWorkSpace
             setEntries(transformations, graspGlobal, g, rotMat, RotZ);
             ws->rotateLocalBase(rotMat.inverse());
         // }
-        // }
+        }
         return true;
     }
 

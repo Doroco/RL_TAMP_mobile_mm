@@ -1,2 +1,10 @@
-1. pranka_panda의 joint state를 시뮬레이션으로 받아와서 arm_motion_planner에 넣어주기
-2. 샘플러들에 Obstacle정보 넣어주기(Base sampler lazy collision check 넣기)
+1. 위치로 잘가는 것을 확인했음 ---> grasp에 대한 Collision Check추가하기 + Contrained motion 넣기(projected RRT)
+2. 성공률(시뮬레이션 제어기...)과 효율성을 entry에 저장을 하는 방식으로 해야하나...? (slam이라던가 결합할 무언가가 있으면 더 좋은 능력을 보여주지 않을까?)
+3. motion planning을 학습으로 더 좋은성능으로 만들자 --> 모션플레닝을 어떻게 학습? --> Constrained를 학습시켜서 더 좋은 Motion의 가이드 라인을 알려주자
+4. 추가적으로 다른사람들은 MOITON PLANNING을 어떤식으로 핛습하고 있는지 찾아보자
+
+
+
+------------------------------------------------ 다른 학습적으로 할것 -----------------------------
+1. convex optimization 공부하기 --> 어떻게 Convex한 문제로 만들어서 해결할까....
+2. RL(DDPG 라던가....) or DC-gan(성공적인 motion planning을 만드는 네트워크) 둘중에 방향을 정하고 가자
