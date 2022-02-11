@@ -17,10 +17,10 @@
     </include> -->
 
 
-    <param name="franka_arm_description" command="$(find xacro)/xacro '$(find franka_description)/robots/panda_arm.urdf.xacro'"/>
+    <param name="franka_arm_description" command="$(find xacro)/xacro '$(find franka_description)/robots/panda_arm_hand.urdf.xacro'"/>
     <param name="urdf_param" value="/franka_arm_description"/> 
   <node name="interfaceServer" pkg="base_placement_planner" type="interfaceServer" output="screen">
-    <param name="yaml_path" type="string" value="$(find base_placement_planner)/config/hw_param.yaml"/>
+    <param name="yaml_path" type="string" value="$(find arm_motion_planner)/config/hw_param.yaml"/>
     <param name="ws_path" type="string" value="$(find base_placement_planner)/mapConfig/"/> 
     <param name="file_name" type="string" value="justReachableAcc.bin"/>  <!-- 저장하거나 로드할 파일 이름 입력!!!!!!! -->
   </node>

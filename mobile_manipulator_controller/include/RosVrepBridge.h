@@ -164,6 +164,7 @@ private:
     /**
     * @brief Other parameters for using ros interface and control    
     */
+    geometry_msgs::TransformStamped world_base;
     geometry_msgs::TransformStamped mobile_base;
     geometry_msgs::TransformStamped panda_base;
     geometry_msgs::TransformStamped camera_base;

@@ -4,8 +4,8 @@
   <node pkg="tf2_ros" type="static_transform_publisher" name="map"
   args="0.0 0.0 0.0 0 0 0 1 map mobile_base"/>
 
-  <node pkg="tf2_ros" type="static_transform_publisher" name="mobile_base"
-  args="0.0 0.0 0.0 0 0 0 1 map mobile_base" />
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="mobile_base"
+  args="0.0 0.0 0.0 0 0 0 1 map mobile_base" /> -->
 
   <node pkg="tf2_ros" type="static_transform_publisher" name="panda_base"
   args="0.31861 0.0 0.4405 0 0 0 1 mobile_base panda_base" />
@@ -14,8 +14,9 @@
   args="-0.21855 -0.1159 1.5190 0 0 0 1 mobile_base camera_base" /> 
 
   <node pkg="tf2_ros" type="static_transform_publisher" name="rgb_optical_frame"
-  args="-0.880 0.018 -0.0909 -0.49927 0.501692 -0.500734 0.498297 camera_base rgb_optical_frame" /> 
+  args="-0.880 0.015 -0.0909 -0.49927 0.501692 -0.500734 0.498297 camera_base rgb_optical_frame" /> 
 
+  <!-- 낮추면... -->
   <!-- -0.950 0.073 -0.1049 +3.1063e-01-->
   <!-- -0.940 -0.055 -0.1049 -->
   <!-- 에져 키넥트 쓸떄 여기에 맞추세욤 !!!!!!!!!!!!! -->

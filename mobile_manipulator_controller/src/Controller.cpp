@@ -334,7 +334,7 @@ bool Controller::mobileController_PurePursuit()
 		std::cout << "ori target  " << errorMeasure * 180 / M_PI << std::endl;
 		std::cout << "ori error  " << fabs(errorMeasure - bs_.pose_.theta) * 180 / M_PI << std::endl;
 
-		if(fabs(errorMeasure - bs_.pose_.theta) < 0.02)
+		if(fabs(errorMeasure - bs_.pose_.theta) < 0.005)
 		{
 			bt_.ctrl_mode = 3;
 			// stop

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from cmath import cos
 from operator import imod
+from pickle import TRUE
 import numpy
 import rospy
 
@@ -192,13 +193,13 @@ def main():
             srv_request.targetGrasp = userdata.targetGraspConfig
 
             ######### Obstacle Impormation #######################################################################################
-            # refrige = ObstacleBox2D()
-            # refrige.maxX.data  = 2.2250 + 0.25
-            # refrige.maxY.data  = -0.32500 + 0.25
-            # refrige.minX.data  = 2.2250 - 0.25
-            # refrige.minY.data  = -0.32500 - 0.25
+            refrige = ObstacleBox2D()
+            refrige.maxX.data  = 2.2250 + 0.35
+            refrige.maxY.data  = -0.32500 + 0.35
+            refrige.minX.data  = 2.2250 - 0.35
+            refrige.minY.data  = -0.32500 - 0.35
 
-            # srv_request.Obstacles2D.append(refrige)
+            srv_request.Obstacles2D.append(refrige)
             return srv_request
 
         @smach.cb_interface(input_keys=['mobileTarget'])
@@ -261,20 +262,21 @@ def main():
             srv_request.current_mobile_state.y = srv_request.current_mobile_state.y + 0.30861 * math.sin(srv_request.current_mobile_state.theta)
 
             srv_request.current_joint_state = rospy.wait_for_message("/panda/joint_states",JointState, timeout=5)
-            srv_request.interpolate_path.data = False
+            srv_request.interpolate_path.data = True
 
-            # obs = Obstacle3D()
-            # obs.Box_dimension.x = 0.25
-            # obs.Box_dimension.y = 0.25
-            # obs.Box_dimension.z = 0.68
-            # obs.Box_pose.position.x = 2.2250
-            # obs.Box_pose.position.y = -0.32500
-            # obs.Box_pose.position.z =  0.69004
-            # obs.Box_pose.orientation.x = 0.0
-            # obs.Box_pose.orientation.y = 0.0
-            # obs.Box_pose.orientation.z = 0.0
-            # obs.Box_pose.orientation.w = 1.0
+            obs = Obstacle3D()
+            obs.Box_dimension.x = 0.25
+            obs.Box_dimension.y = 0.25
+            obs.Box_dimension.z = 0.68
+            obs.Box_pose.position.x = +2.2250e+00
+            obs.Box_pose.position.y = -3.2500e-01
+            obs.Box_pose.position.z =  +6.9004e-01
+            obs.Box_pose.orientation.x = 0.0
+            obs.Box_pose.orientation.y = 0.0
+            obs.Box_pose.orientation.z = 0.0
+            obs.Box_pose.orientation.w = 1.0
 
+            srv_request.Obstacles3D.append(obs)
             srv_request.Pose_bound.position_bound_lower.x = -0.35
             srv_request.Pose_bound.position_bound_lower.y = -0.15
             srv_request.Pose_bound.position_bound_lower.z = -0.15

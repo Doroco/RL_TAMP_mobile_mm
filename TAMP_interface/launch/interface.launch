@@ -1,3 +1,19 @@
 <launch>
     <node name="TAMP_Scence" pkg="TAMP_interface" type="TAMP_interface.py" output="screen"/>
+
+    <!-- sim controller -->
+    <include file="$(find mobile_manipulator_controller)/launch/server.launch">
+    </include>
+   
+    <!-- base placement -->
+    <include file="$(find base_placement_planner)/launch/interface_server.launch">
+    </include>
+
+    <!-- mobile fexibility check -->
+    <include file="$(find mobile_motion_planner)/launch/server.launch">
+    </include>
+
+    <!-- arm fexibility check -->
+    <include file="$(find arm_motion_planner)/launch/arm_server.launch">
+    </include>
 </launch>

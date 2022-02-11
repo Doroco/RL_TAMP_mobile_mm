@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-  <param name="franka_arm_description" command="$(find xacro)/xacro '$(find franka_description)/robots/panda_arm.urdf.xacro'"/>
+  <param name="franka_arm_description" command="$(find xacro)/xacro '$(find franka_description)/robots/panda_arm_hand.urdf.xacro'"/>
   <param name="urdf_param" value="/franka_arm_description"/> 
   <!-- <param name="sim_enable" value= "true"/>  use simulator? -->
 
