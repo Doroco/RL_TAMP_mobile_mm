@@ -39,10 +39,10 @@ int main(int argc, char **argv)
         minB[3 + i] = (float)0;
         maxB[3 + i] = (float)2*M_PI;
     }
-    testWork->initialize(0.08,0.08f,minB,maxB);
-    testWork->addRandomTCPPoses(15000000);
+    testWork->initialize(0.08,0.2f,minB,maxB);
+    testWork->addRandomTCPPoses(8000000);
     testWork->save(ws_path + file_name);
-    // testWork->load("/home/min/ws_ws/src/base_placement_planner/mapConfig/myReachFile.bin");
+    // testWork->load(ws_path + file_name);
 
     Eigen::Matrix4f m;
     m.setIdentity();

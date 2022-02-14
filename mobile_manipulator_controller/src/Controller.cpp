@@ -229,7 +229,7 @@ bool Controller::mobileController_PurePursuit()
 
 		if ((bt_.nb_of_points - 1) <= bt_.traj_index)
 		{
-			bp_.distThre = 0.015; //0.01
+			bp_.distThre = 0.02; //0.01
 		}
 
 		if (bp_.distToTarget < bp_.distThre)

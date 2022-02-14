@@ -188,7 +188,7 @@ def main():
         @smach.cb_interface(input_keys=['targetGraspConfig'])
         def base_pose_sampler_request_cb(userdata, request):
             srv_request = base_placementRequest()
-            srv_request.minEntry.data = 15
+            srv_request.minEntry.data = 1
             srv_request.eGridySearch.data = False
             srv_request.targetGrasp = userdata.targetGraspConfig
 
