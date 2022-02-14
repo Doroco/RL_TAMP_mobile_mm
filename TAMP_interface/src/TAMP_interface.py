@@ -188,7 +188,7 @@ def main():
         @smach.cb_interface(input_keys=['targetGraspConfig'])
         def base_pose_sampler_request_cb(userdata, request):
             srv_request = base_placementRequest()
-            srv_request.minEntry.data = 5
+            srv_request.minEntry.data = 15
             srv_request.eGridySearch.data = False
             srv_request.targetGrasp = userdata.targetGraspConfig
 
@@ -228,8 +228,8 @@ def main():
             if(mobile_srv_request.target_mobile_pose.theta > math.pi) :
                 mobile_srv_request.target_mobile_pose.theta = mobile_srv_request.target_mobile_pose.theta - 2 * math.pi
 
-            mobile_srv_request.target_mobile_pose.x = mobile_srv_request.target_mobile_pose.x - 0.31861 * math.cos(mobile_srv_request.target_mobile_pose.theta)
-            mobile_srv_request.target_mobile_pose.y = mobile_srv_request.target_mobile_pose.y - 0.31861 * math.sin(mobile_srv_request.target_mobile_pose.theta)
+            mobile_srv_request.target_mobile_pose.x = mobile_srv_request.target_mobile_pose.x - 0.30861 * math.cos(mobile_srv_request.target_mobile_pose.theta)
+            mobile_srv_request.target_mobile_pose.y = mobile_srv_request.target_mobile_pose.y - 0.30861 * math.sin(mobile_srv_request.target_mobile_pose.theta)
 
             userdata.mobileTarget.x  = mobile_srv_request.target_mobile_pose.x 
             userdata.mobileTarget.y  = mobile_srv_request.target_mobile_pose.y

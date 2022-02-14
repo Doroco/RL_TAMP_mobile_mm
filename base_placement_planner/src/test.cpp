@@ -39,8 +39,8 @@ int main(int argc, char **argv)
         minB[3 + i] = (float)0;
         maxB[3 + i] = (float)2*M_PI;
     }
-    testWork->initialize(0.1,0.5f,minB,maxB);
-    testWork->addRandomTCPPoses(5000000);
+    testWork->initialize(0.08,0.08f,minB,maxB);
+    testWork->addRandomTCPPoses(15000000);
     testWork->save(ws_path + file_name);
     // testWork->load("/home/min/ws_ws/src/base_placement_planner/mapConfig/myReachFile.bin");
 

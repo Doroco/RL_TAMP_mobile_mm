@@ -1414,6 +1414,7 @@ namespace RobotWorkSpace
         //     // std::cout<<"entry ... : "<<(int)e<<std::endl;
         //     // data->increaseDatum(x, this);
         // }
+        std::cout<<"sampling ... \n"<<p<<std::endl;
         data->increaseDatum(x, this);
         buildUpLoops++;
     }
