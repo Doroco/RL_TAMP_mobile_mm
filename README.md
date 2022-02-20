@@ -24,4 +24,4 @@ Reinfore Learning / Mobile manipulator Task Planning implementaion  by using DDP
 ## Reference
 
 - https://github.com/beomjoonkim/voot.git
-- git@gitlab.com:Simox/simox.git
+- https://gitlab.com/Simox/simox.git
