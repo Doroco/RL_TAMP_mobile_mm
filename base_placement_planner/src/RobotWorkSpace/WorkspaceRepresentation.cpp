@@ -1369,54 +1369,54 @@ namespace RobotWorkSpace
             }
         }
 
-        // // get voxels
-        // unsigned int v[6];
+        // get voxels
+        unsigned int v[6];
         
-        // if(getVoxelFromPose(x, v))
-        // {
-        //     // std::cout<<"sampling ... \n"<<p<<std::endl;
+        if(getVoxelFromPose(x, v))
+        {
+            // std::cout<<"sampling ... \n"<<p<<std::endl;
 
-        //     // Eigen::VectorXf direction(6);
-        //     // direction.setZero();
-        //     // p(0) = 1.0f;
+            // Eigen::VectorXf direction(6);
+            // direction.setZero();
+            // p(0) = 1.0f;
             
-        //     float entry = getPoseQuality() / 0.85;
+            float entry = getPoseQuality() / 0.85;
 
-        //     if (entry > 1)
-        //     {
-        //         if (entry > 1.05)
-        //         {
-        //             std::cout << "Manipulability is larger than max value. Current Manip:" << getPoseQuality() << ", maxManip:" << 0.702419 << ", percent:" << entry << std::endl;
-        //         }
+            if (entry > 1)
+            {
+                if (entry > 1.05)
+                {
+                    std::cout << "Manipulability is larger than max value. Current Manip:" << getPoseQuality() << ", maxManip:" << 0.702419 << ", percent:" << entry << std::endl;
+                }
 
-        //         entry = 1.0f;
-        //     }
+                entry = 1.0f;
+            }
 
-        //     if(RealMax < entry)
-        //         RealMax = entry;
+            if(RealMax < entry)
+                RealMax = entry;
 
-        //     if (entry < 0)
-        //     {
-        //         entry = 0;
-        //     }
+            if (entry < 0)
+            {
+                entry = 0;
+            }
 
-        //     unsigned char e = (unsigned char)(entry * (float)UCHAR_MAX + 0.5f);
-        //     // add at least 1, since the pose is reachable
-        //     if (e == 0)
-        //     {
-        //         e = 1;
-        //     }
+            unsigned char e = (unsigned char)(entry * (float)UCHAR_MAX + 0.5f);
+            // add at least 1, since the pose is reachable
+            if (e == 0)
+            {
+                e = 1;
+            }
 
-        //     if (e > data->get(v))
-        //     {
-        //         data->setDatum(v, e);
-        //     }
-        //     // std::cout<<"entry ... : "<<(int)e<<std::endl;
-        //     // data->increaseDatum(x, this);
-        // }
-        std::cout<<"sampling ... \n"<<p<<std::endl;
-        data->increaseDatum(x, this);
-        buildUpLoops++;
+            if (e > data->get(v))
+            {
+                data->setDatum(v, e);
+            }
+            buildUpLoops++;
+            // std::cout<<"entry ... : "<<(int)e<<std::endl;
+            // data->increaseDatum(x, this);
+        }
+        // std::cout<<"sampling ... \n"<<p<<std::endl;
+        // data->increaseDatum(x, this);
     }
     
     void WorkspaceRepresentation::addCurrentTCPPose()

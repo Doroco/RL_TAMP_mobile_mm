@@ -5,6 +5,6 @@
   <node name="testIRM" pkg="base_placement_planner" type="testIRM" output="screen" >
     <param name="yaml_path" type="string" value="$(find base_placement_planner)/config/hw_param.yaml"/>
     <param name="ws_path" type="string" value="$(find base_placement_planner)/mapConfig/"/> 
-    <param name="file_name" type="string" value="reachableDataAcc.bin"/> <!-- 저장하거나 로드할 파일 이름 입력!!!!!!! -->
+    <param name="file_name" type="string" value="ManipulabilityDataAcc.bin"/> <!-- 저장하거나 로드할 파일 이름 입력!!!!!!! -->
   </node>
 </launch>
