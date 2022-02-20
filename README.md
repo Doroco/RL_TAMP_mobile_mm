@@ -20,3 +20,8 @@ Reinfore Learning / Mobile manipulator Task Planning implementaion  by using DDP
 
 1. Planning Scence이 길어서 샘플데이터 모으기힘들다 --> Importance sampling을 적용한다.
 2. Contraints들으 어떻게 Learning할지?
+
+## Reference
+
+- https://github.com/beomjoonkim/voot.git
+- git@gitlab.com:Simox/simox.git
