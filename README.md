@@ -23,5 +23,6 @@ Reinfore Learning / Mobile manipulator Task Planning implementaion  by using DDP
 
 ## Reference
 
+- https://github.com/jkw0701/robocare_motion_planner.git
 - https://github.com/beomjoonkim/voot.git
 - https://gitlab.com/Simox/simox.git
