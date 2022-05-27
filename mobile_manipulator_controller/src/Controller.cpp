@@ -55,7 +55,7 @@ Controller::Controller()
 	bp_.d = 0.35; //축과 모바일 중심사이 거리
 
 	bp_.maxVel = 1.2;
-	bp_.distThre = 0.05; //0.05
+	bp_.distThre = 0.04; //0.05
 
 	mobile_S.resize(2, 2);
 	mobile_S.setZero();
@@ -266,7 +266,7 @@ bool Controller::mobileController_PurePursuit()
 			bt_.poseTarget_.x = bt_.q_traj_.points[bt_.traj_index].x;
 			bt_.poseTarget_.y = bt_.q_traj_.points[bt_.traj_index].y;
 
-			std::cout<<bt_.poseTarget_<<std::endl;
+			//std::cout<<bt_.poseTarget_<<std::endl;
 
 			bt_.controlStartTime_ = playTime_;
 
@@ -334,31 +334,31 @@ bool Controller::mobileController_PurePursuit()
 		std::cout << "ori target  " << errorMeasure * 180 / M_PI << std::endl;
 		std::cout << "ori error  " << fabs(errorMeasure - bs_.pose_.theta) * 180 / M_PI << std::endl;
 
-		if(fabs(errorMeasure - bs_.pose_.theta) < 0.005)
-		{
-			bt_.ctrl_mode = 3;
-			// stop
-			bt_.desired_vel_(0) = 0.0;
-			bt_.desired_vel_(1) = 0.0;
-			bt_.desired_vel_(2) = 0.0;
-			bt_.desired_vel_(3) = 0.0;
-		}
-		else
-		{
-			bp_.oriErr = 8 * normAngle(bp_.oriErr, -M_PI); // rotation gain: 3
+		// if(fabs(errorMeasure - bs_.pose_.theta) < 0.005)
+		// {
+		// 	bt_.ctrl_mode = 3;
+		// 	// stop
+		// 	bt_.desired_vel_(0) = 0.0;
+		// 	bt_.desired_vel_(1) = 0.0;
+		// 	bt_.desired_vel_(2) = 0.0;
+		// 	bt_.desired_vel_(3) = 0.0;
+		// }
+		// else
+		// {
+		bp_.oriErr = 3 * normAngle(bp_.oriErr, -M_PI); // rotation gain: 3
 
-			
-			if (abs(bp_.oriErr) > 2.0) //0.5
-			{
-				bp_.oriErr = 0.5 * bp_.oriErr / abs(bp_.oriErr); // max_vel : 1
-			}
-
-			//회전 하기위해 반대방향으로
-			bt_.desired_vel_(0) = 1.0 * bp_.oriErr;
-			bt_.desired_vel_(1) = -1.0 * bp_.oriErr;
-			bt_.desired_vel_(2) = -1.0 * bp_.oriErr;
-			bt_.desired_vel_(3) = 1.0 * bp_.oriErr;
+		
+		if (abs(bp_.oriErr) > 0.5) //0.5
+		{
+			bp_.oriErr = 0.5 * bp_.oriErr / abs(bp_.oriErr); // max_vel : 1
 		}
+
+		//회전 하기위해 반대방향으로
+		bt_.desired_vel_(0) = 1.0 * bp_.oriErr;
+		bt_.desired_vel_(1) = -1.0 * bp_.oriErr;
+		bt_.desired_vel_(2) = -1.0 * bp_.oriErr;
+		bt_.desired_vel_(3) = 1.0 * bp_.oriErr;
+		//}
 		cout << "base ori: " << bs_.pose_.theta * 180 / M_PI << endl;
 		break;
 
