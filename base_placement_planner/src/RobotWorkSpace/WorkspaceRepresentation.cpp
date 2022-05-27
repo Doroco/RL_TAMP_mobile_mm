@@ -1380,7 +1380,7 @@ namespace RobotWorkSpace
             // direction.setZero();
             // p(0) = 1.0f;
             
-            float entry = getPoseQuality() / 0.85;
+            float entry = getPoseQuality() / 0.085;
 
             if (entry > 1)
             {

@@ -40,7 +40,7 @@ int main(int argc, char **argv)
         maxB[3 + i] = (float)2*M_PI;
     }
     testWork->initialize(0.08,0.2f,minB,maxB);
-    testWork->addRandomTCPPoses(8000000);
+    testWork->addRandomTCPPoses(8000000); //8000000
     testWork->save(ws_path + file_name);
     // testWork->load(ws_path + file_name);
 
