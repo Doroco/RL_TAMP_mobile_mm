@@ -1,7 +1,7 @@
 # RL_mobile_manip
 
-### I'm still Testing...  :(          
-#### Please wait for month...!
+### I'm still Testing...  ㅠㅠ           
+#### Please wait for month...! 
 Reinfore Learning / Mobile manipulator Task Planning implementaion  by using DDPG
 
 ## Experiment 
@@ -16,13 +16,31 @@ Reinfore Learning / Mobile manipulator Task Planning implementaion  by using DDP
 #### - RL sequence visulazation using smach
 ![image](https://user-images.githubusercontent.com/49723556/152644945-2308bda1-6664-4fd2-9692-59a77cfc3e94.png)
 
+
+#### Excute demo program
+
+1. excute 'roscore' for CoppeliaSim rosInterface.
+2. turn on 'Panda_Husky_test.ttt' for test. 
+3. run 'roslaunch  TAMP_interface interface.launch' on your terminor.
+4. run 'rosrun  smach_viewer smach_viewer.py' you can see whole process on smach viewer!! 
+
+# topic name
+
+ * PointCloud2 : '/k4a/depth_registered/points'  
+ * MakerArray : 'ws_IRM' 
+
 ## TODO
 
-1. Planning Scence이 길어서 샘플데이터 모으기힘들다 --> Importance sampling을 적용한다.
-2. Contraints들으 어떻게 Learning할지?
+1. make IRM with numerical method is inefficient --> get Distribuiton using GAN (fast sampling)
+2. How to use Quality Measure?? 
+3. study RL / ML for efficient implementation.
 
 ## Reference
+- Vahrenkamp, N., Asfour, T., Metta, G., Sandini, G., & Dillmann, R. (2012). Manipulability analysis. 2012 12th IEEE-RAS International Conference on Humanoid Robots (Humanoids 2012)
 
 - https://github.com/jkw0701/robocare_motion_planner.git
 - https://github.com/beomjoonkim/adversarial_actor_critic.git
 - https://gitlab.com/Simox/simox.git
+
+## ..
+if you have any good idea or reference... pleaze share me...
