@@ -43,4 +43,4 @@ Reinfore Learning / Mobile manipulator Task Planning implementaion  by using DDP
 - https://gitlab.com/Simox/simox.git
 
 ## ..
-if you have any good idea or reference... pleaze share me...
+if you find good reference fir project ... pleaze share me... sammin9614@gmail.com
