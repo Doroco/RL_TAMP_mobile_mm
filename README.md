@@ -11,7 +11,7 @@
 #### - IRM structure about sampled Grasp Pose from Point cloud (Red is High value)
 ![image](https://user-images.githubusercontent.com/49723556/151492932-8656a287-cd8e-49da-adbd-e60db22570e8.png)
 
-#### - RL sequence visulazation using smach
+#### - Operating sequence visulazation using smach
 ![image](https://user-images.githubusercontent.com/49723556/152644945-2308bda1-6664-4fd2-9692-59a77cfc3e94.png)
 
 
