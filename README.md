@@ -33,6 +33,7 @@
 2. How to use Quality Measure?? 
 3. study RL / ML for efficient implementation.
 4. apply NVIDA Issac Gym
+5. Identify useful parameters for BasePlacement & TAMP
 
 ## Reference
 - Vahrenkamp, N., Asfour, T., Metta, G., Sandini, G., & Dillmann, R. (2012). Manipulability analysis. 2012 12th IEEE-RAS International Conference on Humanoid Robots (Humanoids 2012)
