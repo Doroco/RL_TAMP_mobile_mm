@@ -1,8 +1,6 @@
-# RL_mobile_manip
+# mobile_manip
 
-### I'm still Testing...  ㅠㅠ           
-#### Please wait for month...! 
-Reinfore Learning / Mobile manipulator Task Planning implementaion  by using DDPG
+ Mobile manipulator Task Planning implementaion  by using legacy method (BasePlacement)
 
 ## Experiment 
 'ros-noetic', 'ubuntu 20.04'
@@ -39,7 +37,6 @@ Reinfore Learning / Mobile manipulator Task Planning implementaion  by using DDP
 - Vahrenkamp, N., Asfour, T., Metta, G., Sandini, G., & Dillmann, R. (2012). Manipulability analysis. 2012 12th IEEE-RAS International Conference on Humanoid Robots (Humanoids 2012)
 
 - https://github.com/jkw0701/robocare_motion_planner.git
-- https://github.com/beomjoonkim/adversarial_actor_critic.git
 - https://gitlab.com/Simox/simox.git
 
 ## ..
